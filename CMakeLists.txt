@@ -8,11 +8,15 @@ include_directories(Interpreter)
 aux_source_directory(Interpreter INTERPRETER)
 
 # API
+include_directories(API)
+aux_source_directory(API API)
 
 # Catalog Manager
+include_directories(CatalogManager)
+aux_source_directory(CatalogManager CATALOGMANAGER)
 
 # Record Manager
 # Index Manager
 # Buffer Manager
 
-add_executable(MiniSQL ${INTERPRETER} main.cpp)
+add_executable(MiniSQL ${INTERPRETER} ${API} ${CATALOGMANAGER} main.cpp)
