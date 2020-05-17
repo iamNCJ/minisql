@@ -1,7 +1,3 @@
-//
-// Created by NCJ on 5/8/2020.
-//
-
 #ifndef MINISQL_API_H
 #define MINISQL_API_H
 
