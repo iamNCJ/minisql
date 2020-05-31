@@ -18,5 +18,7 @@ aux_source_directory(CatalogManager CATALOGMANAGER)
 # Record Manager
 # Index Manager
 # Buffer Manager
+include_directories(BufferManager)
+aux_source_directory(BufferManager BUFFERMANAGER)
 
-add_executable(MiniSQL ${INTERPRETER} ${API} ${CATALOGMANAGER} main.cpp)
+add_executable(MiniSQL ${INTERPRETER} ${API} ${CATALOGMANAGER} ${BUFFERMANAGER} main.cpp)

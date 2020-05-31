@@ -1,0 +1,10 @@
+#ifndef MINISQL_BUFFERMANAGER_H
+#define MINISQL_BUFFERMANAGER_H
+
+
+class BufferManager {
+
+};
+
+
+#endif //MINISQL_BUFFERMANAGER_H
