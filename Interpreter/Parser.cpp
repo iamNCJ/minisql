@@ -6,7 +6,12 @@
 #include <string>
 #include "Parser.h"
 
-void Parser::inputLine(std::string line) {
+/**
+ * send a line into parser
+ * @param line a line of cmd
+ * @return is this line finished
+ */
+bool Parser::inputLine(std::string line) {
     // add space after */=/,/()/<>/;
     for (int pos = 0; pos < line.length(); pos++) {
         if (line[pos] == '*' || line[pos] == '=' || line[pos] == ',' || line[pos] == '(' || line[pos] == ')' ||
@@ -38,14 +43,30 @@ void Parser::inputLine(std::string line) {
             }
             buffer.pop_front(); // pop ";"
             exec(args);
-        }
-        else break;
+        } else break;
     }
 
+    // quit can work without ";"
+    if (buffer.front() == "quit") {
+        std::cout << "Bye!" << std::endl;
+        exit(0);
+    }
+
+    return buffer.empty();
 }
 
-void Parser::exec(const std::vector<std::string>& args) {
-    for (auto & arg : args) {
+/**
+ * execute a line
+ * @param args commands
+ */
+void Parser::exec(const std::vector<std::string> &args) {
+    // quit
+    if (args.front() == "quit") {
+        std::cout << "Bye!" << std::endl;
+        exit(0);
+    }
+
+    for (auto &arg : args) {
         std::cout << arg << " ";
     }
     std::cout << std::endl;

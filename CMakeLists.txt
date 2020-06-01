@@ -19,4 +19,4 @@ aux_source_directory(CatalogManager CATALOGMANAGER)
 # Index Manager
 # Buffer Manager
 
-add_executable(MiniSQL ${INTERPRETER} ${API} ${CATALOGMANAGER} main.cpp)
+add_executable(MiniSQL ${INTERPRETER} ${API} ${CATALOGMANAGER} DataStructure.h main.cpp)

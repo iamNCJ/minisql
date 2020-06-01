@@ -6,13 +6,19 @@
 #include <deque>
 #include <vector>
 
+/**
+ * Grammar Parser inside Interpreter
+ */
 class Parser {
 private:
     std::deque<std::string> buffer;
 
-    static void exec(const std::vector<std::string>& args);
+    static void exec(const std::vector<std::string> &args);
+
 public:
-    void inputLine(std::string line);
+    Parser() = default;
+
+    bool inputLine(std::string line);
 };
 
 
