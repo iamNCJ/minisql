@@ -7,21 +7,10 @@
  */
 void Interpreter::main_loop() {
     std::string inputCmd;
+    static bool inputState = true;
     while (true) {
-        std::cout << "MiniSQL> ";
+        std::cout << (inputState ? "MiniSQL>>" : "        >");
         std::getline(std::cin, inputCmd);
-        parse(inputCmd);
+        inputState = parser.inputLine(inputCmd);
     }
-}
-
-/**
- * Parser for each command
- * @param cmd the command to parse
- */
-void Interpreter::parse(std::string &cmd) {
-    if (cmd == "exit" || cmd == "quit" || cmd == "q") {
-        std::cout << "Bye!" << std::endl;
-        exit(0);
-    }
-    std::cout << cmd << std::endl;
 }
