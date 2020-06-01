@@ -2,6 +2,7 @@
 #define MINISQL_DATASTRUCTURE_H
 
 #include <string>
+#include <stdexcept>
 
 namespace MiniSqlBasic {
     const int BlockSize = 4096;
@@ -13,7 +14,7 @@ namespace MiniSqlBasic {
         Float
     };
 
-    enum class MinisqlType {
+    enum MinisqlType {
         MINISQL_TYPE_INT,
         MINISQL_TYPE_CHAR,
         MINISQL_TYPE_FLOAT,
