@@ -151,6 +151,12 @@ namespace MiniSqlBasic {
         }
         return op;      // = and != need not flip.
     }
+
+    struct Condition {
+        std::string name;
+        Operator op;
+        SqlValue val;
+    };
 }
 
 #endif //MINISQL_DATASTRUCTURE_H
