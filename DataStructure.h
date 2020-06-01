@@ -128,8 +128,7 @@ namespace MiniSqlBasic {
         }
     };
 
-    enum class Operator
-    {
+    enum class Operator {
         GT_OP,
         GE_OP,
         LT_OP,
@@ -138,18 +137,16 @@ namespace MiniSqlBasic {
         NE_OP
     };
 
-    inline Operator flip_operator(Operator op)
-    {
-        switch (op)
-        {
+    inline Operator flip_operator(Operator op) {
+        switch (op) {
             case Operator::GT_OP:
                 return Operator::LT_OP;
             case Operator::GE_OP:
                 return Operator::LE_OP;
-            case Operator ::LT_OP:
-                return Operator ::GT_OP;
-            case Operator ::LE_OP:
-                return Operator ::GE_OP;
+            case Operator::LT_OP:
+                return Operator::GT_OP;
+            case Operator::LE_OP:
+                return Operator::GE_OP;
         }
         return op;      // = and != need not flip.
     }
