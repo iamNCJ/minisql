@@ -11,8 +11,6 @@ namespace API {
 
     bool deleteOp(const std::string &tableName, const std::vector<MiniSqlBasic::Condition> &conditionList);
 
-    bool select(const std::string &tableName, const std::vector<MiniSqlBasic::Condition> &conditionList);
-
     bool select(const std::string &tableName, const std::vector<MiniSqlBasic::Condition> &conditionList, const std::vector<std::string> &attrList);
 
     bool update(const std::string &tableName, const std::string &attr, const MiniSqlBasic::SqlValue &value, const std::vector<MiniSqlBasic::Condition> &conditionList);

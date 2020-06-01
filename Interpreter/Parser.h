@@ -20,8 +20,9 @@ public:
 
     bool inputLine(std::string line);
 
-    static std::string getLower(std::string str, int pos);
-};
+    static std::string getLower(std::string str);
 
+    static void execSelect(const std::vector<std::string> &args);
+};
 
 #endif //MINISQL_PARSER_H

@@ -21,16 +21,6 @@ bool API::deleteOp(const std::string &tableName, const std::vector<MiniSqlBasic:
 }
 
 /**
- * Select all
- * @param tableName table
- * @param conditionList conditions
- * @return isSuc
- */
-bool API::select(const std::string &tableName, const std::vector<MiniSqlBasic::Condition> &conditionList) {
-    return false;
-}
-
-/**
  * Select some attr
  * @param tableName table
  * @param conditionList conditions
@@ -72,7 +62,7 @@ bool API::createTable(const std::string &tableName, const std::vector<std::pair<
  * @param manual is user call or is default (Primary Key)
  * @return isSuc
  */
-bool API::createIndex(const std::string &tableName, const std::string &attrName, const std::string &indexName, bool manual = true) {
+bool API::createIndex(const std::string &tableName, const std::string &attrName, const std::string &indexName, bool manual) {
     return false;
 }
 

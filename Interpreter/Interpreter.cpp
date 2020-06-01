@@ -11,6 +11,10 @@ void Interpreter::main_loop() {
     while (true) {
         std::cout << (inputState ? "MiniSQL>>" : "        >");
         std::getline(std::cin, inputCmd);
-        inputState = parser.inputLine(inputCmd);
+        try {
+            inputState = parser.inputLine(inputCmd);
+        } catch (std::runtime_error error) {
+            std::cout << "[Error] " << error.what() << std::endl;
+        }
     }
 }
