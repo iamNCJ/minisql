@@ -7,6 +7,22 @@
 #include "Parser.h"
 
 /**
+ * get lower case
+ * @param str input string
+ * @param pos
+ * @return
+ */
+std::string Parser::getLower(std::string str, int pos) {
+    for (int index = pos;; index++) {
+        if (str[index] == ' ' || str[index] == '\0')
+            break;
+        else if (str[index] >= 'A' && str[index] <= 'Z')
+            str[index] += 32;
+    }
+    return str;
+}
+
+/**
  * send a line into parser
  * @param line a line of cmd
  * @return is this line finished

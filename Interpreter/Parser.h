@@ -19,6 +19,8 @@ public:
     Parser() = default;
 
     bool inputLine(std::string line);
+
+    static std::string getLower(std::string str, int pos);
 };
 
 
