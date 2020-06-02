@@ -135,6 +135,40 @@ bool API::deleteOp(const std::string &tableName, const std::vector<MiniSqlBasic:
 }
 
 /**
+ * Select *
+ * @param tableName table name string
+ * @param conditionList conditions
+ * @return isSuc
+ */
+bool API::select(const std::string &tableName, const std::vector<MiniSqlBasic::Condition> &conditionList) {
+    auto _cm = API::getCatalogManager();
+
+    // check and get table
+    if (!_cm->ExistTable(tableName)) {
+        std::cerr << "Table not found!" << std::endl;
+        return false;
+    }
+    auto &table = _cm->GetTable(tableName);
+
+    // precheck each condition
+    for (const auto &condition: conditionList) {
+        auto it = std::find(table.attrNames.begin(), table.attrNames.end(), condition.name);
+        if (it == table.attrNames.end()) {
+            std::cerr << "Attribute in conditions mismatch!" << std::endl;
+            return false;
+        }
+        auto type = table.attrType[it - table.attrNames.begin()];
+        if (type.type != condition.val.type.type) {
+            std::cerr << "Type in conditions mismatch!" << std::endl;
+            return false;
+        }
+    }
+
+    // call normal select
+    return select(tableName, conditionList, table.attrNames);
+}
+
+/**
  * Select some attr
  * @param tableName table
  * @param conditionList conditions

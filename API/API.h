@@ -13,6 +13,8 @@ namespace API {
 
     static bool deleteOp(const std::string &tableName, const std::vector<MiniSqlBasic::Condition> &conditionList);
 
+    static bool select(const std::string &tableName, const std::vector<MiniSqlBasic::Condition> &conditionList);
+
     static bool select(const std::string &tableName, const std::vector<MiniSqlBasic::Condition> &conditionList,
                        const std::vector<std::string> &attrList);
 
