@@ -27,4 +27,4 @@ aux_source_directory(IndexManager INDEXMANAGER)
 include_directories(BufferManager)
 aux_source_directory(BufferManager BUFFERMANAGER)
 
-add_executable(MiniSQL ${INTERPRETER} ${API} ${CATALOGMANAGER} ${BUFFERMANAGER} ${RECORDMANAGER} ${INDEXMANAGER} BPTree.h DataStructure.h main.cpp)
+add_executable(MiniSQL ${BUFFERMANAGER} ${RECORDMANAGER} ${INDEXMANAGER} BPTree.h DataStructure.h main.cpp)
