@@ -18,9 +18,13 @@ aux_source_directory(CatalogManager CATALOGMANAGER)
 # Record Manager
 include_directories(RecordManager)
 aux_source_directory(RecordManager RECORDMANAGER)
+
 # Index Manager
+include_directories(IndexManager)
+aux_source_directory(IndexManager INDEXMANAGER)
+
 # Buffer Manager
 include_directories(BufferManager)
 aux_source_directory(BufferManager BUFFERMANAGER)
 
-add_executable(MiniSQL ${INTERPRETER} ${API} ${CATALOGMANAGER} ${BUFFERMANAGER} ${RECORDMANAGER} DataStructure.h main.cpp)
+add_executable(MiniSQL ${INTERPRETER} ${API} ${CATALOGMANAGER} ${BUFFERMANAGER} ${RECORDMANAGER} ${INDEXMANAGER} BPTree.h DataStructure.h main.cpp)

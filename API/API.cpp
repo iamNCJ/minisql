@@ -27,7 +27,8 @@ bool API::deleteOp(const std::string &tableName, const std::vector<MiniSqlBasic:
  * @param attrList attributes
  * @return isSuc
  */
-bool API::select(const std::string &tableName, const std::vector<MiniSqlBasic::Condition> &conditionList, const std::vector<std::string> &attrList) {
+bool API::select(const std::string &tableName, const std::vector<MiniSqlBasic::Condition> &conditionList,
+                 const std::vector<std::string> &attrList) {
     return false;
 }
 
@@ -39,7 +40,8 @@ bool API::select(const std::string &tableName, const std::vector<MiniSqlBasic::C
  * @param conditionList conditions
  * @return isSuc
  */
-bool API::update(const std::string &tableName, const std::string &attr, const MiniSqlBasic::SqlValue &value, const std::vector<MiniSqlBasic::Condition> &conditionList) {
+bool API::update(const std::string &tableName, const std::string &attr, const MiniSqlBasic::SqlValue &value,
+                 const std::vector<MiniSqlBasic::Condition> &conditionList) {
     return false;
 }
 
@@ -50,7 +52,9 @@ bool API::update(const std::string &tableName, const std::string &attr, const Mi
  * @param primaryKey primary key
  * @return isSuc
  */
-bool API::createTable(const std::string &tableName, const std::vector<std::pair<std::string, MiniSqlBasic::SqlValue>> &attrList, const std::string &primaryKey) {
+bool API::createTable(const std::string &tableName,
+                      const std::vector<std::pair<std::string, MiniSqlBasic::SqlValue>> &attrList,
+                      const std::string &primaryKey) {
     return false;
 }
 
@@ -62,7 +66,8 @@ bool API::createTable(const std::string &tableName, const std::vector<std::pair<
  * @param manual is user call or is default (Primary Key)
  * @return isSuc
  */
-bool API::createIndex(const std::string &tableName, const std::string &attrName, const std::string &indexName, bool manual) {
+bool
+API::createIndex(const std::string &tableName, const std::string &attrName, const std::string &indexName, bool manual) {
     return false;
 }
 
@@ -82,4 +87,41 @@ bool API::dropTable(const std::string &tableName) {
  */
 bool API::dropIndex(const std::string &indexName) {
     return false;
+}
+
+/**
+ * Get record manager
+ * @return pointer to record manager
+ */
+RecordManager *API::getRecordManager() {
+    if (rm == nullptr) {
+        auto _im = getIndexManager();
+        auto _bm = getBufferManager();
+        rm = new RecordManager(_bm, _im);
+    }
+    return rm;
+}
+
+/**
+ * Get index manager
+ * @return pointer to index manager
+ */
+IndexManager *API::getIndexManager() {
+    return (im == nullptr) ? im = new IndexManager() : im;
+}
+
+/**
+ * get buffer manager
+ * @return pointer to buffer manager
+ */
+BufferManager *API::getBufferManager() {
+    return (bm == nullptr) ? bm = new BufferManager() : bm;
+}
+
+/**
+ * get catalog manager
+ * @return catalog manager
+ */
+CatalogManager *API::getCatalogManager() {
+    return (cm == nullptr) ? cm = new CatalogManager() : cm;
 }

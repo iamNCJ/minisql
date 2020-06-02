@@ -28,11 +28,11 @@ public:
 
     int insertRecord(const Table &table, const Tuple &record);
 
-    int selectRecord(const Table &table, const vector<string> &attr, const vector<Cond> &cond);
+    int selectRecord(const Table &table, const vector<string> &attr, const vector<Condition> &cond);
 
-    int selectRecord(const Table &table, const vector<string> &attr, const vector<Cond> &cond, const IndexHint &indexHint, bool printResult = true);
+    int selectRecord(const Table &table, const vector<string> &attr, const vector<Condition> &cond, const IndexHint &indexHint, bool printResult = true);
 
-    bool deleteRecord(const Table &table, const vector<Cond> &cond);
+    bool deleteRecord(const Table &table, const vector<Condition> &cond);
 
 private:
     BufferManager *bm;
@@ -40,7 +40,7 @@ private:
 
     void dumpResult(const Result &res) const;
 
-    bool condsTest(const std::vector<Cond> &conds, const Tuple &tup, const std::vector<std::string> &attr);
+    bool condsTest(const std::vector<Condition> &conds, const Tuple &tup, const std::vector<std::string> &attr);
 
     void convertToTuple(const char *blockBuffer, int offset, const std::vector<SqlValueType> &attrType, Tuple &tup);
 };
