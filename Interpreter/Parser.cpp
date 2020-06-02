@@ -92,10 +92,14 @@ void Parser::exec(const std::vector<std::string> &args) {
         exit(0);
     }
 
-    if (getLower(args[0]) == "select") { // Select
+    if (getLower(args.at(0)) == "select") { // Select
         execSelect(args);
+    } else if (getLower(args.at(0)) == "delete") { // Delete
+        execDelete(args);
+    } else if (getLower(args.at(0)) == "drop") { // Drop
+        execDrop(args);
     } else {
-        throw std::runtime_error("You have an error in your SQL syntax");
+        throw std::runtime_error("SYNTAX ERROR: You have an error in your SQL syntax");
     }
 }
 
@@ -104,59 +108,175 @@ void Parser::exec(const std::vector<std::string> &args) {
  * @param args arguments
  */
 void Parser::execSelect(const std::vector<std::string> &args) {
-    std::string table;
-    std::vector<std::string> attrs;
     std::vector<MiniSqlBasic::Condition> conditions;
 
-    int i = 1, len = args.size();
-    try {
-        for (; i < len; i += 2) {
-            if (args.at(i) == "*") { ; // TODO get all attrs
-            } else if (args.at(i) == ",") {
-                throw std::runtime_error("You have an error in your SQL syntax");
-            } else {
-                attrs.push_back(args.at(i));
-            }
+    auto _cm = API::getCatalogManager();
 
-            if (getLower(args.at(i + 1)) == "from") {
-                break;
-            } else if (args.at(i + 1) == ",") {
-                continue;
-            } else {
-                throw std::runtime_error("You have an error in your SQL syntax");
-            }
-        }
-        table = args.at(i + 2);
-        i += 3; // skip table name
-    } catch (std::out_of_range &out_of_range) {
-        throw std::runtime_error("You have an error in your SQL syntax");
+    // everything in the world should be select * from !!!
+    auto it = std::find(args.begin(), args.end(), "from");
+    int distance = it - args.begin();
+    std::string tableName = args[distance + 1];
+
+    // check and get table
+    if (!_cm->ExistTable(tableName)) {
+        std::cerr << "Table " << tableName << " not found!" << std::endl;
+        return;
     }
-    if (i <= len - 1) {
-        if (getLower(args.at(i)) != "where") throw std::runtime_error("You have an error in your SQL syntax");
-        else i++;
-        for (; i < len;) {
-            std::string attr = args[i++];
-            MiniSqlBasic::Operator op;
-            if (args.at(i) == "<" && args.at(i + 1) == "=") {
-                op = MiniSqlBasic::Operator::LE_OP;
-                i++;
-            } else if (args.at(i) == "<" && args.at(i + 1) == ">") {
-                op = MiniSqlBasic::Operator::NE_OP;
-                i++;
-            } else if (args.at(i) == ">" && args.at(i + 1) == "=") {
-                op = MiniSqlBasic::Operator::GE_OP;
-                i++;
-            } else if (args.at(i) == "<") {
-                op = MiniSqlBasic::Operator::LT_OP;
-            } else if (args.at(i) == ">") {
-                op = MiniSqlBasic::Operator::GT_OP;
-            } else if (args.at(i) == "=") {
-                op = MiniSqlBasic::Operator::EQ_OP;
-            }
+    auto &table = _cm->GetTable(tableName);
+
+    for (int i = distance + 2, len = args.size(), j = 0; i < len; j++) {
+        std::string attr = args.at(i++);
+        MiniSqlBasic::Operator op;
+        if (args.at(i) == "<" && args.at(i + 1) == "=") {
+            op = MiniSqlBasic::Operator::LE_OP;
             i++;
-            // check type from catalog manager
+        } else if (args.at(i) == "<" && args.at(i + 1) == ">") {
+            op = MiniSqlBasic::Operator::NE_OP;
+            i++;
+        } else if (args.at(i) == ">" && args.at(i + 1) == "=") {
+            op = MiniSqlBasic::Operator::GE_OP;
+            i++;
+        } else if (args.at(i) == "<") {
+            op = MiniSqlBasic::Operator::LT_OP;
+        } else if (args.at(i) == ">") {
+            op = MiniSqlBasic::Operator::GT_OP;
+        } else if (args.at(i) == "=") {
+            op = MiniSqlBasic::Operator::EQ_OP;
+        } else {
+            std::cout << "You have an error in your SQL syntax" << std::endl;
+            return; // TODO make it more elegent
         }
+        i++;
+
+        SqlValue val;
+        try {
+            // Prepare val
+            SqlValueType type = table.attrType.at(j);
+            val.type = type;
+            switch (type.type) {
+                case SqlValueTypeBase::Integer:
+                    val.i = std::stoi(args.at(i));
+                    break;
+                case SqlValueTypeBase::Float:
+                    val.r = std::stof(args.at(i));
+                    break;
+                case SqlValueTypeBase::String:
+                    val.str = args.at(i).substr(1, args.at(i).length() - 2); // remove 2 "'"
+                    break;
+            }
+        } catch (...) {
+            std::cout << "You have an error in your SQL syntax" << std::endl;
+            return; // TODO make it more elegent
+        }
+
+        Condition condition;
+        condition.name = attr;
+        condition.op = op;
+        condition.val = val;
+        conditions.push_back(condition);
+
+        i += 2; // pass "and"
     }
+
     std::cout << std::endl;
-    API::select(table, conditions, attrs);
+    API::select(tableName, conditions);
+}
+
+
+/**
+ * Execute delete operation
+ * @param args arguments
+ */
+void Parser::execDelete(const std::vector<std::string> &args) {
+    std::vector<MiniSqlBasic::Condition> conditions;
+
+    auto _cm = API::getCatalogManager();
+
+    // everything in the world should be delete from !!!
+    auto it = std::find(args.begin(), args.end(), "from");
+    int distance = it - args.begin();
+    std::string tableName = args[distance + 1];
+
+    // check and get table
+    if (!_cm->ExistTable(tableName)) {
+        std::cerr << "Table not " << tableName << " found!" << std::endl;
+        return;
+    }
+    auto &table = _cm->GetTable(tableName);
+
+    for (int i = distance + 2, len = args.size(), j = 0; i < len; j++) {
+        std::string attr = args.at(i++);
+        MiniSqlBasic::Operator op;
+        if (args.at(i) == "<" && args.at(i + 1) == "=") {
+            op = MiniSqlBasic::Operator::LE_OP;
+            i++;
+        } else if (args.at(i) == "<" && args.at(i + 1) == ">") {
+            op = MiniSqlBasic::Operator::NE_OP;
+            i++;
+        } else if (args.at(i) == ">" && args.at(i + 1) == "=") {
+            op = MiniSqlBasic::Operator::GE_OP;
+            i++;
+        } else if (args.at(i) == "<") {
+            op = MiniSqlBasic::Operator::LT_OP;
+        } else if (args.at(i) == ">") {
+            op = MiniSqlBasic::Operator::GT_OP;
+        } else if (args.at(i) == "=") {
+            op = MiniSqlBasic::Operator::EQ_OP;
+        } else {
+            std::cout << "You have an error in your SQL syntax" << std::endl;
+            return; // TODO make it more elegent
+        }
+        i++;
+
+        SqlValue val;
+        try {
+            // Prepare val
+            SqlValueType type = table.attrType.at(j);
+            val.type = type;
+            switch (type.type) {
+                case SqlValueTypeBase::Integer:
+                    val.i = std::stoi(args.at(i));
+                    break;
+                case SqlValueTypeBase::Float:
+                    val.r = std::stof(args.at(i));
+                    break;
+                case SqlValueTypeBase::String:
+                    val.str = args.at(i).substr(1, args.at(i).length() - 2); // remove 2 "'"
+                    break;
+            }
+        } catch (...) {
+            std::cout << "You have an error in your SQL syntax" << std::endl;
+            return; // TODO make it more elegent
+        }
+
+        Condition condition;
+        condition.name = attr;
+        condition.op = op;
+        condition.val = val;
+        conditions.push_back(condition);
+
+        i += 2; // pass "and"
+    }
+
+    std::cout << std::endl;
+    API::deleteOp(tableName, conditions);
+}
+
+/**
+ * Execute drop operation
+ * @param args arguments
+ */
+void Parser::execDrop(const std::vector<std::string> &args) {
+    try {
+        if (args.at(1) == "table") {
+            API::dropTable(args.at(2));
+        } else if (args.at(1) == "index") {
+            API::dropIndex(args.at(2));
+        } else {
+            throw std::runtime_error("SYNTAX ERROR: You have an error in your SQL syntax");
+            return;
+        }
+    } catch (std::out_of_range) {
+        throw std::runtime_error("SYNTAX ERROR: You have an error in your SQL syntax");
+    }
 }
