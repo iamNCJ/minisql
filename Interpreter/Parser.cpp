@@ -107,7 +107,11 @@ void Parser::exec(const std::vector<std::string> &args) {
     } else if (getLower(args.at(0)) == "insert") { // Insert
         execInsert(args);
     } else if (getLower(args.at(0)) == "execfile") { // Execfile
-        execFile(args.at(1));
+        try {
+            execFile(args.at(1));
+        } catch (std::out_of_range) {
+            throw std::runtime_error("SYNTAX ERROR: You have an error in your SQL syntax");
+        }
     } else {
         throw std::runtime_error("SYNTAX ERROR: You have an error in your SQL syntax");
     }
@@ -432,6 +436,16 @@ void Parser::execInsert(const vector<std::string> &args) {
  * Execute file
  * @param fileName filename string
  */
-void execFile(const std::string &fileName) {
-    ;
+void Parser::execFile(const std::string &fileName) {
+    Parser parser;
+    std::string inputCmd;
+    std::ifstream infile(fileName);
+    while (std::getline(infile, inputCmd)) {
+        try {
+            parser.inputLine(inputCmd);
+        } catch (std::runtime_error &error) {
+            std::cout << "[Error] " << error.what() << std::endl;
+            parser.flushBuffer();
+        }
+    }
 }
