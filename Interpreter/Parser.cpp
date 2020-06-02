@@ -92,12 +92,14 @@ void Parser::exec(const std::vector<std::string> &args) {
         exit(0);
     }
 
-    if (getLower(args[0]) == "select") { // Select
+    if (getLower(args.at(0)) == "select") { // Select
         execSelect(args);
-    } else if (getLower(args[0]) == "delete") { // Delete
+    } else if (getLower(args.at(0)) == "delete") { // Delete
         execDelete(args);
+    } else if (getLower(args.at(0)) == "drop") { // Drop
+        execDrop(args);
     } else {
-        throw std::runtime_error("You have an error in your SQL syntax");
+        throw std::runtime_error("SYNTAX ERROR: You have an error in your SQL syntax");
     }
 }
 
@@ -258,4 +260,23 @@ void Parser::execDelete(const std::vector<std::string> &args) {
 
     std::cout << std::endl;
     API::deleteOp(tableName, conditions);
+}
+
+/**
+ * Execute drop operation
+ * @param args arguments
+ */
+void Parser::execDrop(const std::vector<std::string> &args) {
+    try {
+        if (args.at(1) == "table") {
+            API::dropTable(args.at(2));
+        } else if (args.at(1) == "index") {
+            API::dropIndex(args.at(2));
+        } else {
+            throw std::runtime_error("SYNTAX ERROR: You have an error in your SQL syntax");
+            return;
+        }
+    } catch (std::out_of_range) {
+        throw std::runtime_error("SYNTAX ERROR: You have an error in your SQL syntax");
+    }
 }

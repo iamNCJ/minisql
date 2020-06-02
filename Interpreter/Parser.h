@@ -21,6 +21,7 @@ private:
 
     static void execDelete(const std::vector<std::string> &args);
 
+    static void execDrop(const std::vector<std::string> &args);
 
 public:
     Parser() = default;
