@@ -35,7 +35,7 @@ private:
 private:
     std::vector<MiniSqlBasic::Table> tables;
 
-    static constexpr auto metaFileName = "db_files/tables.meta";
+    static constexpr auto metaFileName = "tables.meta";
 };
 
 
