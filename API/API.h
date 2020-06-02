@@ -27,13 +27,13 @@ namespace API {
 
     static bool dropIndex(const std::string &item);
 
-    static RecordManager *getRecordManager();
+    RecordManager *getRecordManager();
 
-    static IndexManager *getIndexManager();
+    IndexManager *getIndexManager();
 
-    static BufferManager *getBufferManager();
+    BufferManager *getBufferManager();
 
-    static CatalogManager *getCatalogManager();
+    CatalogManager *getCatalogManager();
 
     static RecordManager *rm;
     static IndexManager *im;
