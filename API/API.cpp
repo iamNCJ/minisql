@@ -143,7 +143,49 @@ bool API::deleteOp(const std::string &tableName, const std::vector<MiniSqlBasic:
  */
 bool API::select(const std::string &tableName, const std::vector<MiniSqlBasic::Condition> &conditionList,
                  const std::vector<std::string> &attrList) {
-    return false;
+    auto _rm = API::getRecordManager();
+    auto _cm = API::getCatalogManager();
+
+    // check and get table
+    if (!_cm->ExistTable(tableName)) {
+        std::cerr << "Table not found!" << std::endl;
+        return false;
+    }
+    auto &table = _cm->GetTable(tableName);
+
+    // condition to cond // TODO check correctness
+    auto condList = std::vector<Cond>();
+    for (const auto &condition: conditionList) {
+        condList.push_back(condition);
+    }
+
+    // check attr list valid
+    for (auto &attr: attrList) {
+        if (std::find(table.attrNames.begin(), table.attrNames.end(), attr) == table.attrNames.end()) {
+            std::cerr << "Attribute mismatch!" << std::endl;
+            return false;
+        }
+    }
+
+    // call managers to select
+    if (table.index.size() == 0 || condList.size() == 0) {
+        // no index to acc || select all
+        return _rm->selectRecord(table, attrList, condList);
+    } else {
+        for (const auto &index: table.index) {
+            for (const auto &cond: condList) {
+                if (index.first == cond.attr) { // if this is the index on the attr
+                    IndexHint hint;
+                    hint.attrName = cond.attr;
+                    hint.cond = cond;
+                    hint.attrType = cond.value.type.M();
+                    return _rm->selectRecord(table, attrList, condList, hint); // use index to acc
+                }
+            }
+        }
+        // no acc, standard select
+        return _rm->selectRecord(table, attrList, condList);
+    }
 }
 
 /**
@@ -154,9 +196,62 @@ bool API::select(const std::string &tableName, const std::vector<MiniSqlBasic::C
  * @return isSuc
  */
 bool API::createTable(const std::string &tableName,
-                      const std::vector<std::pair<std::string, MiniSqlBasic::SqlValue>> &attrList,
+                      const std::vector<std::pair<std::string, MiniSqlBasic::SqlValueType>> &attrList,
                       const std::string &primaryKey) {
-    return false;
+    auto _rm = API::getRecordManager();
+    auto _cm = API::getCatalogManager();
+
+    // check if exists
+    if (_cm->ExistTable(tableName)) {
+        std::cerr << "Table" << tableName << " already exists!" << std::endl;
+        return false;
+    }
+
+    // check char(n) range 1~255
+    for (auto &attr: attrList) {
+        if (attr.second.type == SqlValueTypeBase::String) {
+            if (attr.second.charSize < 1 || attr.second.charSize > 255) {
+                std::cerr << "Char count out of range" << std::endl;
+                return false;
+            }
+        }
+    }
+
+    // find primary key
+    bool isPrimaryIndex = false;
+    SqlValueType primaryKeyType;
+    std::string indexName;
+    if (!primaryKey.empty()) {
+        bool primaryKeyFoundFlag = false;
+        for (auto &attr: attrList) {
+            if (attr.first == primaryKey) {
+                primaryKeyFoundFlag = true;
+                primaryKeyType = attr.second;
+                primaryKeyType.unique = true;
+                primaryKeyType.charSize = attr.second.getSize();
+                primaryKeyType.attrName = attr.first;
+                indexName = "pri_" + tableName + "_" + attr.first;
+                isPrimaryIndex = true;
+            }
+        }
+        if (!primaryKeyFoundFlag) {
+            std::cerr << "Primary key not found!" << std::endl;
+            return false;
+        }
+    }
+
+    // call managers to create
+    auto res = _rm->createTable(tableName);
+    _cm->CreateTable(tableName, attrList, primaryKey);
+    auto &tb = _cm->GetTable(tableName);
+    if (isPrimaryIndex) {
+        _rm->createIndex(tb, primaryKeyType);
+        tb.index.push_back(std::make_pair(primaryKey, indexName));
+    }
+    std::cout << "Create table " << tableName << " success." << std::endl;
+    _cm->WriteToFile();
+
+    return res;
 }
 
 /**
@@ -169,7 +264,63 @@ bool API::createTable(const std::string &tableName,
  */
 bool
 API::createIndex(const std::string &tableName, const std::string &attrName, const std::string &indexName, bool manual) {
-    return false;
+    auto _rm = API::getRecordManager();
+    auto _cm = API::getCatalogManager();
+
+    // check if index not exists
+    if (_cm->ExistIndex(indexName)) {
+        std::cerr << "Index name" << indexName << " exists!" << std::endl;
+        return false;
+    }
+
+    // check if table exists
+    if (!_cm->ExistTable(tableName)) {
+        std::cerr << "Table" << tableName << " not found!" << std::endl;
+        return false;
+    }
+    auto &table = _cm->GetTable(tableName);
+
+    // check if there already has an index
+    for (auto &index: table.index) {
+        if (index.first == attrName) {
+            // auto gen, not error
+            if (index.second.find("autoIndex_") == 0) {
+                index.second = indexName;
+                std::cout << "Create index" << indexName << " success" << std::endl;
+                return true;
+            }
+            // manually gen index, error
+            std::cerr << "Index on the attribute " << attrName << " exists!" << std::endl;
+            return false;
+        }
+    }
+
+    // find and check attr
+    SqlValueType type;
+    for (int i = 0; i < table.attrNames.size(); ++i) {
+        if (table.attrNames[i] == attrName) {
+            if (table.attrType[i].unique) {
+                type = table.attrType[i];
+                type.attrName = table.attrNames[i];
+                break;
+            } else { // only unique attr can have index
+                std::cout << "Not a unique attribute!!" << std::endl;
+                return false;
+            }
+        }
+    }
+
+    // call managers to create index
+    auto res = _rm->createIndex(table, type);
+    table.index.emplace_back(attrName, indexName);
+    _cm->WriteToFile();
+    if (res) {
+        std::cout << "Create index success" << std::endl;
+        return true;
+    } else {
+        std::cerr << "Unknown failure!" << std::endl;
+        return false;
+    }
 }
 
 /**

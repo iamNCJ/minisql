@@ -17,7 +17,7 @@ namespace API {
                        const std::vector<std::string> &attrList);
 
     static bool createTable(const std::string &tableName,
-                            const std::vector<std::pair<std::string, MiniSqlBasic::SqlValue>> &attrList,
+                            const std::vector<std::pair<std::string, MiniSqlBasic::SqlValueType>> &attrList,
                             const std::string &primaryKey);
 
     static bool createIndex(const std::string &tableName, const std::string &attrName, const std::string &indexName,
