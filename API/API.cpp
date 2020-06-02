@@ -237,7 +237,7 @@ bool API::createTable(const std::string &tableName,
 
     // check if exists
     if (_cm->ExistTable(tableName)) {
-        std::cerr << "Table" << tableName << " already exists!" << std::endl;
+        std::cerr << "Table " << tableName << " already exists!" << std::endl;
         return false;
     }
 
