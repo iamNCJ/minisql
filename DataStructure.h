@@ -19,6 +19,14 @@ namespace MiniSqlBasic {
     const char UnUsed = 0;
     const char Used = 1;
 
+    inline std::string dbFile(const std::string &db) { return db + ".db"; }
+
+    inline std::string tableFile(const std::string &table) { return table + ".tb"; }
+
+    inline std::string indexFile(const std::string &table, const std::string &index) {
+        return table + "_" + index + ".ind";
+    }
+
     enum class SqlValueTypeBase {
         Integer,
         String,

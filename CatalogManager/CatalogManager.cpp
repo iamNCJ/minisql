@@ -1,6 +1,7 @@
 #include <fstream>
 #include <algorithm>
 #include "CatalogManager.h"
+#include "RecordManager.h"
 #include "API.h"
 
 /**

@@ -9,15 +9,12 @@
 #include "../RecordManager/RecordManager.h"
 
 namespace API {
-    static int insert(const std::string &tableName, const std::vector<MiniSqlBasic::SqlValue> &valueList);
+    static int insert(const std::string &tableName, std::vector<MiniSqlBasic::SqlValue> &valueList);
 
     static bool deleteOp(const std::string &tableName, const std::vector<MiniSqlBasic::Condition> &conditionList);
 
     static bool select(const std::string &tableName, const std::vector<MiniSqlBasic::Condition> &conditionList,
                        const std::vector<std::string> &attrList);
-
-    static bool update(const std::string &tableName, const std::string &attr, const MiniSqlBasic::SqlValue &value,
-                       const std::vector<MiniSqlBasic::Condition> &conditionList);
 
     static bool createTable(const std::string &tableName,
                             const std::vector<std::pair<std::string, MiniSqlBasic::SqlValue>> &attrList,
@@ -28,7 +25,7 @@ namespace API {
 
     static bool dropTable(const std::string &tableName);
 
-    static bool dropIndex(const std::string &indexName);
+    static bool dropIndex(const std::string &item);
 
     static RecordManager *getRecordManager();
 
