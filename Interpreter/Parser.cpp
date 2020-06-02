@@ -6,6 +6,7 @@
 #include <string>
 #include "Parser.h"
 #include "API.h"
+#include "../DataStructure.h"
 
 /**
  * get lower case
@@ -59,18 +60,25 @@ bool Parser::inputLine(std::string line) {
                 buffer.pop_front();
             }
             buffer.pop_front(); // pop ";"
-            if (args.size() == 0) continue;
+            if (args.empty()) continue;
             exec(args);
         } else break;
     }
 
     // quit can work without ";"
-    if (buffer.front() == "quit") {
+    if (!buffer.empty() && buffer.front() == "quit") {
         std::cout << "Bye!" << std::endl;
         exit(0);
     }
 
     return buffer.empty();
+}
+
+/**
+ * WriteToFile readline buffer
+ */
+void Parser::flushBuffer() {
+    buffer.clear();
 }
 
 /**
@@ -110,7 +118,7 @@ void Parser::execSelect(const std::vector<std::string> &args) {
                 attrs.push_back(args.at(i));
             }
 
-            if (args.at(i + 1) == "from") {
+            if (getLower(args.at(i + 1)) == "from") {
                 break;
             } else if (args.at(i + 1) == ",") {
                 continue;
@@ -120,13 +128,34 @@ void Parser::execSelect(const std::vector<std::string> &args) {
         }
         table = args.at(i + 2);
         i += 3; // skip table name
-    } catch (std::out_of_range) {
+    } catch (std::out_of_range &out_of_range) {
         throw std::runtime_error("You have an error in your SQL syntax");
     }
     if (i <= len - 1) {
-        if (args.at(i) != "where") throw std::runtime_error("You have an error in your SQL syntax");
+        if (getLower(args.at(i)) != "where") throw std::runtime_error("You have an error in your SQL syntax");
         else i++;
-        // TODO parse conditions
+        for (; i < len;) {
+            std::string attr = args[i++];
+            MiniSqlBasic::Operator op;
+            if (args.at(i) == "<" && args.at(i + 1) == "=") {
+                op = MiniSqlBasic::Operator::LE_OP;
+                i++;
+            } else if (args.at(i) == "<" && args.at(i + 1) == ">") {
+                op = MiniSqlBasic::Operator::NE_OP;
+                i++;
+            } else if (args.at(i) == ">" && args.at(i + 1) == "=") {
+                op = MiniSqlBasic::Operator::GE_OP;
+                i++;
+            } else if (args.at(i) == "<") {
+                op = MiniSqlBasic::Operator::LT_OP;
+            } else if (args.at(i) == ">") {
+                op = MiniSqlBasic::Operator::GT_OP;
+            } else if (args.at(i) == "=") {
+                op = MiniSqlBasic::Operator::EQ_OP;
+            }
+            i++;
+            // check type from catalog manager
+        }
     }
     std::cout << std::endl;
     API::select(table, conditions, attrs);

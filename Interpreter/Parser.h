@@ -15,14 +15,16 @@ private:
 
     static void exec(const std::vector<std::string> &args);
 
+    static std::string getLower(std::string str);
+
+    static void execSelect(const std::vector<std::string> &args);
+
 public:
     Parser() = default;
 
     bool inputLine(std::string line);
 
-    static std::string getLower(std::string str);
-
-    static void execSelect(const std::vector<std::string> &args);
+    void flushBuffer(void);
 };
 
 #endif //MINISQL_PARSER_H
