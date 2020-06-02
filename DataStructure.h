@@ -1,6 +1,13 @@
 #ifndef MINISQL_DATASTRUCTURE_H
 #define MINISQL_DATASTRUCTURE_H
 
+#define MINISQL_COND_EQUAL 0
+#define MINISQL_COND_UEQUAL 1
+#define MINISQL_COND_LEQUAL 2
+#define MINISQL_COND_GEQUAL 3
+#define MINISQL_COND_LESS 4
+#define MINISQL_COND_MORE 5
+
 #include <string>
 #include <stdexcept>
 
@@ -218,6 +225,60 @@ namespace MiniSqlBasic {
                 << " recordCnt: " << table.recordCnt << " size: " << table.size
                 << " attrNames: " << table.attrNames.size();
             return os;
+        }
+    };
+
+    struct Cond {
+        Cond() = default;
+
+        Cond(const std::string &attr, const Element &value, int cond) : attr(attr), value(value), cond(cond) {}
+
+        Cond(const Condition &condition)
+                : attr(condition.name),
+                  value(condition.val) {
+            switch (condition.op) {
+                case Operator::GE_OP:
+                    cond = MINISQL_COND_GEQUAL;
+                    break;
+                case Operator::LE_OP:
+                    cond = MINISQL_COND_LEQUAL;
+                    break;
+                case Operator::GT_OP:
+                    cond = MINISQL_COND_MORE;
+                    break;
+                case Operator::LT_OP:
+                    cond = MINISQL_COND_LESS;
+                    break;
+                case Operator::EQ_OP:
+                    cond = MINISQL_COND_EQUAL;
+                    break;
+                case Operator::NE_OP:
+                    cond = MINISQL_COND_UEQUAL;
+                    break;
+            }
+        }
+
+        int cond;
+        std::string attr;
+        Element value;
+
+        bool test(const Element &e) const {
+            switch (cond) {
+                case MINISQL_COND_EQUAL:
+                    return e == value;
+                case MINISQL_COND_UEQUAL:
+                    return e != value;
+                case MINISQL_COND_LEQUAL:
+                    return e <= value;
+                case MINISQL_COND_GEQUAL:
+                    return e >= value;
+                case MINISQL_COND_LESS:
+                    return e < value;
+                case MINISQL_COND_MORE:
+                    return e > value;
+                default:
+                    std::cerr << "Undefined condition width cond " << cond << "!" << std::endl;
+            }
         }
     };
 }
