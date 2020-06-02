@@ -51,22 +51,33 @@ class BufferManager {
     typedef map<pair<string, unsigned int>, Block &> TYPE_BLOCK_MAP;
     TYPE_BLOCK_MAP blockMap;
     vector<Block> blockBuffer;
-    
+
     void setBusy(int id);
+
     Block &getFreeBlock();
+
     Block &findPair(string filename, unsigned int blockID) const;
 
     int maxLRU;
 public:
     BufferManager();
+
     ~BufferManager() = default;
+
     int getTailBlock(string filename);
+
     void setDirty(const string &filename, unsigned int blockID);
+
     char *getBlock(string filename, unsigned int blockID, bool allocate = false);
+
     void flushAll();
+
     void createFile(string filename);
+
     Block &getLRU();
+
     void removeFile(string filename);
+
     void setFree(string filename, unsigned int blockID);
 };
 

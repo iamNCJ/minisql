@@ -12,7 +12,7 @@ BufferManager::BufferManager() {
     }
 }
 
-int BufferManager::getTailBlock(string filename){
+int BufferManager::getTailBlock(string filename) {
     struct stat st;
     if (!stat(filename.c_str(), &st)) {
         return st.st_size / BlockSize - 1;
@@ -20,12 +20,12 @@ int BufferManager::getTailBlock(string filename){
     cerr << "Failed to get number of blocks in file" + filename << endl;
 }
 
-void BufferManager::setDirty(const string &filename, unsigned int blockID){
+void BufferManager::setDirty(const string &filename, unsigned int blockID) {
     Block &block = findPair(filename, blockID);
     block.dirty = true;
 }
 
-char *BufferManager::getBlock(string filename, unsigned int offset, bool allocate = false){
+char *BufferManager::getBlock(string filename, unsigned int offset, bool allocate) {
     for (auto &blk: blockBuffer) {
         if (blk.filename == filename && blk.blockID == offset) {
             setBusy(blk.id);
@@ -33,14 +33,14 @@ char *BufferManager::getBlock(string filename, unsigned int offset, bool allocat
             return blk.content;
         }
     }
-    
+
     fstream fp;
-    fp.open(filename, ios::in | ios::out | ios:: binary);
+    fp.open(filename, ios::in | ios::out | ios::binary);
     if (!fp.good()) cerr << "Fail to open:" << filename;
     fp.seekg(ios_base::end);
     int blockOffset = getTailBlock(filename) + 1;
     if (offset >= blockOffset) {
-        if (!allocate) {return nullptr;}
+        if (!allocate) { return nullptr; }
         if (blockOffset != offset) {
             cerr << "offset too large";
             return nullptr;
@@ -49,7 +49,7 @@ char *BufferManager::getBlock(string filename, unsigned int offset, bool allocat
     Block &block = getFreeBlock();
     block.bind(filename, offset);
     blockMap.insert(TYPE_BLOCK_MAP::value_type(make_pair(filename, offset), block));
-    
+
     fp.seekg(offset * BlockSize, ios::beg);
     fp.read(block.content, BlockSize);
     fp.close();
@@ -58,7 +58,7 @@ char *BufferManager::getBlock(string filename, unsigned int offset, bool allocat
     return block.content;
 }
 
-void BufferManager::flushAll(){
+void BufferManager::flushAll() {
     for (auto &blk: blockBuffer) {
         if (blk.dirty) {
             blk.flush();
@@ -67,11 +67,11 @@ void BufferManager::flushAll(){
     }
 }
 
-void BufferManager::createFile(string filename){
+void BufferManager::createFile(string filename) {
     ofstream f1(filename);
 }
 
-void BufferManager::removeFile(string filename){
+void BufferManager::removeFile(string filename) {
     for (auto &blk: blockBuffer) {
         if (blk.filename == filename) {
             blk.reset();
