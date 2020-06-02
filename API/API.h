@@ -9,25 +9,25 @@
 #include "../RecordManager/RecordManager.h"
 
 namespace API {
-    static int insert(const std::string &tableName, std::vector<MiniSqlBasic::SqlValue> &valueList);
+    int insert(const std::string &tableName, std::vector<MiniSqlBasic::SqlValue> &valueList);
 
-    static bool deleteOp(const std::string &tableName, const std::vector<MiniSqlBasic::Condition> &conditionList);
+    bool deleteOp(const std::string &tableName, const std::vector<MiniSqlBasic::Condition> &conditionList);
 
-    static bool select(const std::string &tableName, const std::vector<MiniSqlBasic::Condition> &conditionList);
+    bool select(const std::string &tableName, const std::vector<MiniSqlBasic::Condition> &conditionList);
 
-    static bool select(const std::string &tableName, const std::vector<MiniSqlBasic::Condition> &conditionList,
-                       const std::vector<std::string> &attrList);
+    bool select(const std::string &tableName, const std::vector<MiniSqlBasic::Condition> &conditionList,
+                const std::vector<std::string> &attrList);
 
-    static bool createTable(const std::string &tableName,
-                            const std::vector<std::pair<std::string, MiniSqlBasic::SqlValueType>> &attrList,
-                            const std::string &primaryKey);
+    bool createTable(const std::string &tableName,
+                     const std::vector<std::pair<std::string, MiniSqlBasic::SqlValueType>> &attrList,
+                     const std::string &primaryKey);
 
-    static bool createIndex(const std::string &tableName, const std::string &attrName, const std::string &indexName,
-                            bool manual = true);
+    bool createIndex(const std::string &tableName, const std::string &attrName, const std::string &indexName,
+                     bool manual = true);
 
-    static bool dropTable(const std::string &tableName);
+    bool dropTable(const std::string &tableName);
 
-    static bool dropIndex(const std::string &item);
+    bool dropIndex(const std::string &item);
 
     RecordManager *getRecordManager();
 
