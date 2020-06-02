@@ -4,6 +4,12 @@ bool RecordManager::createTable(const string &table) {
     bm->createFile(table + ".tb");
 }
 
+bool RecordManager::dropTable(const string &table) {
+    string tableFileStr = table + ".db";
+    bm->removeFile(tableFileStr);
+    return true;
+}
+
 bool RecordManager::createIndex(const Table &table, const SqlValueType &index) {
     string indexFileStr = table.Name + "_" + index.attrName + ".ind";
 
@@ -107,7 +113,7 @@ int RecordManager::insertRecord(const Table &table, const Tuple &record) {
             case MINISQL_TYPE_CHAR:
                 fixedStr = attr->str;
                 if (attr->type.charSize > fixedStr.length()) {
-                    fixedStr.append('\0');
+                    fixedStr += '\0';
                 }
                 memcpy(content + offset, fixedStr.c_str(), attr->type.charSize + 1);
                 offset += attr->type.charSize + 1;
@@ -129,7 +135,6 @@ int RecordManager::insertRecord(const Table &table, const Tuple &record) {
     bm->setFree(tableName, tailBlockID);
     return tailBlockID * rcdPerBlock + rcdOffset;
 }
-
 int RecordManager::selectRecord(const Table &table, const vector<string> &attr, const vector<Cond> &cond) {
     int blockID = 0;
     char *block = bm->getBlock(table.Name + ".db", blockID);
@@ -220,11 +225,11 @@ int RecordManager::selectRecord(const Table &table, const vector<string> &attr, 
         return selectRecord(table, attr, cond);
     }
 }
+
 //TODO
 bool RecordManager::deleteRecord(const Table &table, const vector<Cond> &cond) {
-    string tableName = table.Name + ".db";
     int blockOffset = 0;
-    char *block = bm->getBlock(tableName, blockOffset);
+    char *block = bm->getBlock(table.Name + ".db", blockOffset);
     int length = table.recordLength + 1;
     int blocks = BlockSize / length;
     Tuple tup;
@@ -244,10 +249,10 @@ bool RecordManager::deleteRecord(const Table &table, const vector<Cond> &cond) {
                 }
             }
         }
-        bm->setDirty(tableName, blockOffset);
-        bm->setFree(tableName, blockOffset);
+        bm->setDirty(table.Name + ".db", blockOffset);
+        bm->setFree(table.Name + ".db", blockOffset);
         blockOffset++;
-        block = bm->getBlock(tableName, blockOffset);
+        block = bm->getBlock(table.Name + ".db", blockOffset);
     }
 }
 
@@ -288,4 +293,24 @@ void RecordManager::convertToTuple(const char *blockBuffer, int offset, const st
         }
         tup.element.push_back(e);
     }
+}
+
+bool RecordManager::condsTest(const std::vector<Cond> &conds, const Tuple &tup, const std::vector<std::string> &attr) {
+    int condPos;
+    for (Cond cond : conds) {
+        condPos = -1;
+        for (int i = 0; i < attr.size(); i++) {
+            if (attr[i] == cond.attr) {
+                condPos = i;
+                break;
+            }
+        }
+        if (condPos == -1) {
+            std::cerr << "Attr not found in cond test!" << std::endl;
+        }
+        if (!cond.test(tup.element[condPos])) {
+            return false;
+        }
+    }
+    return true;
 }
