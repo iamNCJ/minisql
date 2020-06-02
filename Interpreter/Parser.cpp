@@ -104,6 +104,10 @@ void Parser::exec(const std::vector<std::string> &args) {
         } else if (args.at(1) == "table") { // create table
             execCreateTable(args);
         }
+    } else if (getLower(args.at(0)) == "insert") { // Insert
+        execInsert(args);
+    } else if (getLower(args.at(0)) == "execfile") { // Execfile
+        execFile(args.at(1));
     } else {
         throw std::runtime_error("SYNTAX ERROR: You have an error in your SQL syntax");
     }
@@ -130,7 +134,7 @@ void Parser::execSelect(const std::vector<std::string> &args) {
     }
     auto &table = _cm->GetTable(tableName);
 
-    for (int i = distance + 2, len = args.size(), j = 0; i < len; j++) {
+    for (int i = distance + 2, len = args.size(); i < len;) {
         std::string attr = args.at(i++);
         MiniSqlBasic::Operator op;
         if (args.at(i) == "<" && args.at(i + 1) == "=") {
@@ -157,6 +161,13 @@ void Parser::execSelect(const std::vector<std::string> &args) {
         SqlValue val;
         try {
             // Prepare val
+            int j;
+            for (j = 0; j < table.attrType.size(); j++) {
+                if (table.attrType.at(j).attrName == attr) break;
+            }
+            if (j == table.attrType.size()) {
+                throw std::runtime_error("Attribute not found!");
+            }
             SqlValueType type = table.attrType.at(j);
             val.type = type;
             switch (type.type) {
@@ -172,7 +183,7 @@ void Parser::execSelect(const std::vector<std::string> &args) {
             }
         } catch (...) {
             std::cout << "You have an error in your SQL syntax" << std::endl;
-            return; // TODO make it more elegent
+            return; // TODO make it more elegant
         }
 
         Condition condition;
@@ -209,7 +220,7 @@ void Parser::execDelete(const std::vector<std::string> &args) {
     }
     auto &table = _cm->GetTable(tableName);
 
-    for (int i = distance + 2, len = args.size(), j = 0; i < len; j++) {
+    for (int i = distance + 2, len = args.size(); i < len;) {
         std::string attr = args.at(i++);
         MiniSqlBasic::Operator op;
         if (args.at(i) == "<" && args.at(i + 1) == "=") {
@@ -236,6 +247,13 @@ void Parser::execDelete(const std::vector<std::string> &args) {
         SqlValue val;
         try {
             // Prepare val
+            int j;
+            for (j = 0; j < table.attrType.size(); j++) {
+                if (table.attrType.at(j).attrName == attr) break;
+            }
+            if (j == table.attrType.size()) {
+                throw std::runtime_error("Attribute not found!");
+            }
             SqlValueType type = table.attrType.at(j);
             val.type = type;
             switch (type.type) {
@@ -323,6 +341,7 @@ void Parser::execCreateTable(const vector<std::string> &args) {
 
         for (int i = 4, len = args.size(); i < len - 7;) {
             SqlValueType type;
+
             type.attrName = args.at(i++);
             if (args.at(i) == "int") { // Integer
                 type.type = MiniSqlBasic::SqlValueTypeBase::Integer;
@@ -333,7 +352,8 @@ void Parser::execCreateTable(const vector<std::string> &args) {
             } else if (args.at(i) == "char") { // Char
                 type.type = MiniSqlBasic::SqlValueTypeBase::String;
                 i += 2;
-                type.charSize = std::stoi(args.at(i++)); // i++ to pass ")"
+                type.charSize = std::stoi(args.at(i)); // i++ to pass ")"
+                i += 2;
             }
 
             if (type.attrName == primaryKey) { // is primary
@@ -346,7 +366,8 @@ void Parser::execCreateTable(const vector<std::string> &args) {
             }
             i++; // pass ","
 
-            attrList.push_back(std::pair<std::string, MiniSqlBasic::SqlValueType>(type.attrName, type)); // add to attr list
+            attrList.push_back(
+                    std::pair<std::string, MiniSqlBasic::SqlValueType>(type.attrName, type)); // add to attr list
         }
 
         if (!hasPrimaryKey) {
@@ -364,5 +385,53 @@ void Parser::execCreateTable(const vector<std::string> &args) {
  * @param args arguments
  */
 void Parser::execInsert(const vector<std::string> &args) {
+    try {
+        std::string tableName = args.at(2);
+        std::vector<SqlValue> valueList;
 
+        auto _cm = API::getCatalogManager();
+        // check and get table
+        if (!_cm->ExistTable(tableName)) {
+            std::cerr << "Table not " << tableName << " found!" << std::endl;
+            return;
+        }
+        auto &table = _cm->GetTable(tableName);
+
+        for (int i = 5, len = args.size(), j = 0; i < len - 1; i += 2, j++) {
+            SqlValue val;
+            try {
+                // Prepare val
+                SqlValueType type = table.attrType.at(j);
+                val.type = type;
+                switch (type.type) {
+                    case SqlValueTypeBase::Integer:
+                        val.i = std::stoi(args.at(i));
+                        break;
+                    case SqlValueTypeBase::Float:
+                        val.r = std::stof(args.at(i));
+                        break;
+                    case SqlValueTypeBase::String:
+                        val.str = args.at(i).substr(1, args.at(i).length() - 2); // remove 2 "'"
+                        break;
+                }
+            } catch (...) {
+                std::cout << "You have an error in your SQL syntax" << std::endl;
+                return; // TODO make it more elegent
+            }
+            valueList.push_back(val);
+        }
+
+        // call API
+        API::insert(tableName, valueList);
+    } catch (std::out_of_range) {
+        throw std::runtime_error("SYNTAX ERROR: You have an error in your SQL syntax!");
+    }
+}
+
+/**
+ * Execute file
+ * @param fileName filename string
+ */
+void execFile(const std::string &fileName) {
+    ;
 }
