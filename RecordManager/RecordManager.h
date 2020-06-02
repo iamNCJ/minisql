@@ -6,12 +6,11 @@
 #include <string>
 #include "../DataStructure.h"
 #include "../BufferManager/BufferManager.h"
+#include "../IndexManager/IndexManager.h"
 
 
 using namespace std;
 using namespace MiniSqlBasic;
-
-typedef int IndexManager; //TODO implement IM
 
 class RecordManager {
 public:
@@ -19,13 +18,13 @@ public:
 
     ~RecordManager() = default;
 
-    void createTable(const string &table);
+    bool createTable(const string &table);
 
-    void dropTable(const string &table);
+    bool dropTable(const string &table);
 
-    void createIndex(const Table &table, const SqlValueType &index);
+    bool createIndex(const Table &table, const SqlValueType &index);
 
-    void dropIndex(const Table &table, const string &index);
+    bool dropIndex(const Table &table, const string &index);
 
     int insertRecord(const Table &table, const Tuple &record);
 

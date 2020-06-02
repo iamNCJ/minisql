@@ -1,22 +1,19 @@
 #include "RecordManager.h"
 
-void RecordManager::createTable(const string &table) {
+bool RecordManager::createTable(const string &table) {
     bm->createFile(table + ".tb");
 }
 
-void RecordManager::createIndex(const Table &table, const SqlValueType &index) {
+bool RecordManager::createIndex(const Table &table, const SqlValueType &index) {
     string indexFileStr = table.Name + "_" + index.attrName + ".ind";
-    // Call BM to create index file
+
     bm->createFile(indexFileStr);
-    // Call IM to create index tree
-    // im->create(indexFileStr, index);
-    // Add initial values to index tree
+
     int blockID = 0;
     char *block = bm->getBlock(table.Name + ".db", blockID);
     int length = table.recordLength + 1;
     int recordsPerBlock = BlockSize / length;
     int offset = 1;
-    Tuple tup;
     Element attr;
     const char *dest;
 
@@ -45,7 +42,7 @@ void RecordManager::createIndex(const Table &table, const SqlValueType &index) {
                 default:
                     cerr << "Undefined type in RM::createIndex." << endl;
             }
-            im->insert(indexFileStr, attr, blockID * recordsPerBlock + i);
+            im->insert(indexFileStr, attr, blockID * recordsPerBlock + i); 
         }
         bm->setFree(table.Name + ".db", blockID);
         blockID++;
@@ -53,7 +50,7 @@ void RecordManager::createIndex(const Table &table, const SqlValueType &index) {
     }
 }
 
-void RecordManager::dropIndex(const Table &table, const string &index) {
+bool RecordManager::dropIndex(const Table &table, const string &index) {
     string indexFileStr = table.Name + "_" + index + ".ind";
     bm->removeFile(indexFileStr);
 
@@ -73,68 +70,64 @@ void RecordManager::dropIndex(const Table &table, const string &index) {
 
 int RecordManager::insertRecord(const Table &table, const Tuple &record) {
     string tableName = table.Name + ".db";
-    int blockID = bm->getTailBlock(tableName);
-    char *block;
-    if (blockID < 0) {
-        blockID = 0;
-        block = bm->getBlock(tableName, blockID, true);
+    int tailBlockID = bm->getTailBlock(tableName);
+    char *content;
+    if (tailBlockID >= 0) {
+        content = bm->getBlock(tableName, tailBlockID);
     } else {
-        block = bm->getBlock(tableName, blockID);
+        tailBlockID = 0;
+        content = bm->getBlock(tableName, tailBlockID, true);
     }
-    int length = table.recordLength + 1;
-    int recordsPerBlock = BlockSize / length;
-    int offset = 1;
-    string strFixed;
-    int lengthOffset;
 
-    bool validBlock = false;
+    int len =  table.recordLength + 1;
+    int rcdPerBlock = BlockSize / len;
 
-    int recordOffset = 0;
-
-    while (recordOffset < recordsPerBlock) {
-        if (block[recordOffset * length] != UnUsed) {
-            recordOffset++;
-            continue;
+    int rcdOffset = 0;
+    bool validWord = false;
+    while (rcdOffset < rcdPerBlock) {
+        if (content[rcdOffset * len] == Used) {
+            rcdOffset++;
+        } else {
+            validWord = true;
+            content += rcdOffset * len;
+            break;
         }
-        validBlock = true;
-        block += recordOffset * length;
-        break;
     }
 
-    if (!validBlock) {
-        recordOffset = 0;
-        bm->setFree(tableName, blockID);
-        block = bm->getBlock(tableName, ++blockID, true); // get next block (should be empty) and get the first unit
+    if (!validWord) {
+        rcdOffset = 0;
+        bm->setFree(tableName, tailBlockID);
+        content = bm->getBlock(tableName, ++tailBlockID, true);
     }
 
+    int offset = 1;
+    string fixedStr;
     for (auto attr = record.element.begin(); attr < record.element.end(); attr++) {
         switch (attr->type.M()) {
             case MINISQL_TYPE_CHAR:
-                strFixed = attr->str;
-                lengthOffset = attr->type.charSize - strFixed.length();
-                if (lengthOffset > 0) {
-                    strFixed.insert(strFixed.length(), lengthOffset, 0);
+                fixedStr = attr->str;
+                if (attr->type.charSize > fixedStr.length()) {
+                    fixedStr.append('\0');
                 }
-                memcpy(block + offset, strFixed.c_str(), attr->type.charSize + 1);
+                memcpy(content + offset, fixedStr.c_str(), attr->type.charSize + 1);
                 offset += attr->type.charSize + 1;
                 break;
             case MINISQL_TYPE_INT:
-                memcpy(block + offset, &attr->i, sizeof(int));
+                memcpy(content + offset, &attr->i, sizeof(int));
                 offset += sizeof(int);
                 break;
             case MINISQL_TYPE_FLOAT:
-                memcpy(block + offset, &attr->r, sizeof(float));
+                memcpy(content + offset, &attr->r, sizeof(float));
                 offset += sizeof(float);
                 break;
             default:
-                cerr << "Undefined type!!" << endl;
-                break;
+                std::runtime_error("Invalid Type");
         }
     }
-    block[0] = Used;
-    bm->setDirty(tableName, blockID);
-    bm->setFree(tableName, blockID);
-    return blockID * recordsPerBlock + recordOffset;
+    content[0] = Used;
+    bm->setDirty(tableName, tailBlockID);
+    bm->setFree(tableName, tailBlockID);
+    return tailBlockID * rcdPerBlock + rcdOffset;
 }
 
 int RecordManager::selectRecord(const Table &table, const vector<string> &attr, const vector<Cond> &cond) {
@@ -167,7 +160,7 @@ int RecordManager::selectRecord(const Table &table, const vector<string> &attr, 
 int RecordManager::selectRecord(const Table &table, const vector<string> &attr, const vector<Cond> &cond,
                                  const IndexHint &indexHint, bool printResult) {
     string tableFileName = table.Name + ".db";
-    string indexFileName = indexFile(table.Name, indexHint.attrName);
+    string indexFileName = table.Name + "_" + indexHint.attrName + ".ind";
     int recordPos;
     if (indexHint.cond.cond == MINISQL_COND_LESS || indexHint.cond.cond == MINISQL_COND_LEQUAL) {
         recordPos = im->searchHead(indexFileName, indexHint.attrType);
@@ -227,10 +220,11 @@ int RecordManager::selectRecord(const Table &table, const vector<string> &attr, 
         return selectRecord(table, attr, cond);
     }
 }
-
+//TODO
 bool RecordManager::deleteRecord(const Table &table, const vector<Cond> &cond) {
+    string tableName = table.Name + ".db";
     int blockOffset = 0;
-    char *block = bm->getBlock(table.Name + ".db", blockOffset);
+    char *block = bm->getBlock(tableName, blockOffset);
     int length = table.recordLength + 1;
     int blocks = BlockSize / length;
     Tuple tup;
@@ -244,49 +238,33 @@ bool RecordManager::deleteRecord(const Table &table, const vector<Cond> &cond) {
                 for (auto &col: tup.element) {
                     for (auto &attr : table.index) {
                         if (col.type.attrName == attr.first) {
-                            im->removeKey(indexFile(table.Name, attr.first), col);
+                            im->removeKey(table.Name + "_" + attr.first + ".ind", col);
                         }
                     }
                 }
             }
         }
-        bm->setDirty(table.Name + ".db", blockOffset);
-        bm->setFree(table.Name + ".db", blockOffset);
+        bm->setDirty(tableName, blockOffset);
+        bm->setFree(tableName, blockOffset);
         blockOffset++;
-        block = bm->getBlock(table.Name + ".db", blockOffset);
+        block = bm->getBlock(tableName, blockOffset);
     }
 }
 
+//@ Output the result
 void RecordManager::dumpResult(const Result &res) const {
     for (auto const &row : res.row) {
         cout << " | ";
         for (auto const &col : row.col) {
             cout << col << " | ";
         }
-        cout << endl;
+        cout << "\n";
     }
 }
 
-bool RecordManager::condsTest(const std::vector<Cond> &conds, const Tuple &tup, const std::vector<std::string> &attr) {
-    int condPos;
-    for (Cond cond : conds) {
-        condPos = -1;
-        for (int i = 0; i < attr.size(); i++) {
-            if (attr[i] == cond.attr) {
-                condPos = i;
-                break;
-            }
-        }
-        if (condPos == -1) {
-            std::cerr << "Attr not found in cond test!" << std::endl;
-        }
-        if (!cond.test(tup.element[condPos])) {
-            return false;
-        }
-    }
-    return true;
-}
-
+/*
+* @convert a attr vector to tuple
+*/
 void RecordManager::convertToTuple(const char *blockBuffer, int offset, const std::vector<SqlValueType> &attrType, Tuple &tup) {
     const char *block = blockBuffer + offset + 1; // 1 for meta bit
     Element e;
