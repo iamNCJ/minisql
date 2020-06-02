@@ -90,6 +90,7 @@ void Parser::flushBuffer() {
 void Parser::exec(const std::vector<std::string> &args) {
     // Quit
     if (args.front() == "quit") {
+        API::flushAll();
         std::cout << "Bye!" << std::endl;
         exit(0);
     }
