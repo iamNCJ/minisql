@@ -29,12 +29,14 @@ private:
 
     static void execInsert(const std::vector<std::string> &args);
 
+    static void execFile(const std::string &fileName);
+
 public:
     Parser() = default;
 
     bool inputLine(std::string line);
 
-    void flushBuffer(void);
+    void flushBuffer();
 };
 
 #endif //MINISQL_PARSER_H
