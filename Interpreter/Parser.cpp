@@ -67,6 +67,7 @@ bool Parser::inputLine(std::string line) {
 
     // quit can work without ";"
     if (!buffer.empty() && buffer.front() == "quit") {
+        API::flushAll();
         std::cout << "Bye!" << std::endl;
         exit(0);
     }

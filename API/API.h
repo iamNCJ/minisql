@@ -29,6 +29,8 @@ namespace API {
 
     bool dropIndex(const std::string &item);
 
+    void flushAll();
+
     RecordManager *getRecordManager();
 
     IndexManager *getIndexManager();
