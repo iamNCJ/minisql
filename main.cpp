@@ -81,9 +81,6 @@ int main() {
     tu.element[2].str = "Oh~";
     rm.insertRecord(tb, tu);
     vector<string> attrs;
-    attrs.push_back("i");
-    attrs.push_back("f");
-    attrs.push_back("c");
     vector<MiniSqlBasic::Cond> conds;
-    rm.selectRecord(tb, attrs, conds);
+    rm.selectRecord(tb, tb.attrNames, conds);
 }
