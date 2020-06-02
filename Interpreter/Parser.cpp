@@ -98,6 +98,12 @@ void Parser::exec(const std::vector<std::string> &args) {
         execDelete(args);
     } else if (getLower(args.at(0)) == "drop") { // Drop
         execDrop(args);
+    } else if (getLower(args.at(0)) == "create") { // Create
+        if (args.at(1) == "index") { // create index
+            execCreateIndex(args);
+        } else if (args.at(1) == "table") { // create table
+            execCreateTable(args);
+        }
     } else {
         throw std::runtime_error("SYNTAX ERROR: You have an error in your SQL syntax");
     }
@@ -181,7 +187,6 @@ void Parser::execSelect(const std::vector<std::string> &args) {
     std::cout << std::endl;
     API::select(tableName, conditions);
 }
-
 
 /**
  * Execute delete operation
@@ -279,4 +284,85 @@ void Parser::execDrop(const std::vector<std::string> &args) {
     } catch (std::out_of_range) {
         throw std::runtime_error("SYNTAX ERROR: You have an error in your SQL syntax");
     }
+}
+
+/**
+ * Execute create index operation
+ * @param args arguments
+ */
+void Parser::execCreateIndex(const vector<std::string> &args) {
+    try {
+        std::string indexName = args.at(2);
+        std::string tableName = args.at(4);
+        std::string attrName = args.at(6);
+
+        // call API
+        API::createIndex(tableName, attrName, indexName, true);
+    } catch (std::out_of_range) {
+        throw std::runtime_error("SYNTAX ERROR: You have an error in your SQL syntax");
+    }
+}
+
+/**
+ * Exectute create table operation
+ * @param args arguments
+ */
+void Parser::execCreateTable(const vector<std::string> &args) {
+    try {
+        std::string tableName = args.at(2);
+        std::vector<std::pair<std::string, MiniSqlBasic::SqlValueType>> attrList;
+        std::string primaryKey;
+        bool hasPrimaryKey = false;
+
+        // primary key
+        if (args.at(args.size() - 6) == "primary" && args.at(args.size() - 5) == "key") {
+            primaryKey = args.at(args.size() - 3);
+        } else {
+            throw std::runtime_error("SYNTAX ERROR: You must have primary key when create table!");
+        }
+
+        for (int i = 4, len = args.size(); i < len - 7;) {
+            SqlValueType type;
+            type.attrName = args.at(i++);
+            if (args.at(i) == "int") { // Integer
+                type.type = MiniSqlBasic::SqlValueTypeBase::Integer;
+                i++;
+            } else if (args.at(i) == "float") { // Float
+                type.type = MiniSqlBasic::SqlValueTypeBase::Float;
+                i++;
+            } else if (args.at(i) == "char") { // Char
+                type.type = MiniSqlBasic::SqlValueTypeBase::String;
+                i += 2;
+                type.charSize = std::stoi(args.at(i++)); // i++ to pass ")"
+            }
+
+            if (type.attrName == primaryKey) { // is primary
+                hasPrimaryKey = true;
+                type.primary = true;
+            }
+            if (args.at(i) == "unique") { // is unique
+                type.unique = true;
+                i++;
+            }
+            i++; // pass ","
+
+            attrList.push_back(std::pair<std::string, MiniSqlBasic::SqlValueType>(type.attrName, type)); // add to attr list
+        }
+
+        if (!hasPrimaryKey) {
+            throw std::runtime_error("SYNTAX ERROR: Primary key not inside attributes!");
+        }
+        // call API
+        API::createTable(tableName, attrList, primaryKey);
+    } catch (std::out_of_range) {
+        throw std::runtime_error("SYNTAX ERROR: You have an error in your SQL syntax!");
+    }
+}
+
+/**
+ * Exectute insert operation
+ * @param args arguments
+ */
+void Parser::execInsert(const vector<std::string> &args) {
+
 }

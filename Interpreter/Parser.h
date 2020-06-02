@@ -23,6 +23,12 @@ private:
 
     static void execDrop(const std::vector<std::string> &args);
 
+    static void execCreateIndex(const std::vector<std::string> &args);
+
+    static void execCreateTable(const std::vector<std::string> &args);
+
+    static void execInsert(const std::vector<std::string> &args);
+
 public:
     Parser() = default;
 
