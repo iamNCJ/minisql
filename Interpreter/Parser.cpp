@@ -139,7 +139,7 @@ void Parser::execSelect(const std::vector<std::string> &args) {
     }
     auto &table = _cm->GetTable(tableName);
 
-    for (int i = distance + 2, len = args.size(); i < len;) {
+    for (int i = distance + 3, len = args.size(); i < len;) {
         std::string attr = args.at(i++);
         MiniSqlBasic::Operator op;
         if (args.at(i) == "<" && args.at(i + 1) == "=") {
