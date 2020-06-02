@@ -281,6 +281,12 @@ namespace MiniSqlBasic {
             }
         }
     };
+
+    struct IndexHint {
+        Cond cond;
+        std::string attrName;
+        int attrType;
+    };
 }
 
 #endif //MINISQL_DATASTRUCTURE_H
