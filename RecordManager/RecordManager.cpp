@@ -14,7 +14,8 @@ bool RecordManager::createIndex(const Table &table, const SqlValueType &index) {
     string indexFileStr = table.Name + "_" + index.attrName + ".ind";
 
     bm->createFile(indexFileStr);
-
+    im->create(indexFileStr, index);
+    
     int blockID = 0;
     char *block = bm->getBlock(table.Name + ".tb", blockID);
     int length = table.recordLength + 1;
@@ -59,7 +60,6 @@ bool RecordManager::createIndex(const Table &table, const SqlValueType &index) {
 bool RecordManager::dropIndex(const Table &table, const string &index) {
     string indexFileStr = table.Name + "_" + index + ".ind";
     bm->removeFile(indexFileStr);
-
     bool foundAttr = false;
 
     for (auto &attr : table.attrType) {
