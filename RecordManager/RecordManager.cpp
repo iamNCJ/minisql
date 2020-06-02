@@ -5,7 +5,7 @@ bool RecordManager::createTable(const string &table) {
 }
 
 bool RecordManager::dropTable(const string &table) {
-    string tableFileStr = table + ".db";
+    string tableFileStr = table + ".tb";
     bm->removeFile(tableFileStr);
     return true;
 }
@@ -16,7 +16,7 @@ bool RecordManager::createIndex(const Table &table, const SqlValueType &index) {
     bm->createFile(indexFileStr);
 
     int blockID = 0;
-    char *block = bm->getBlock(table.Name + ".db", blockID);
+    char *block = bm->getBlock(table.Name + ".tb", blockID);
     int length = table.recordLength + 1;
     int recordsPerBlock = BlockSize / length;
     int offset = 1;
@@ -50,9 +50,9 @@ bool RecordManager::createIndex(const Table &table, const SqlValueType &index) {
             }
             im->insert(indexFileStr, attr, blockID * recordsPerBlock + i); 
         }
-        bm->setFree(table.Name + ".db", blockID);
+        bm->setFree(table.Name + ".tb", blockID);
         blockID++;
-        block = bm->getBlock(table.Name + ".db", blockID);
+        block = bm->getBlock(table.Name + ".tb", blockID);
     }
 }
 
@@ -75,7 +75,7 @@ bool RecordManager::dropIndex(const Table &table, const string &index) {
 }
 
 int RecordManager::insertRecord(const Table &table, const Tuple &record) {
-    string tableName = table.Name + ".db";
+    string tableName = table.Name + ".tb";
     int tailBlockID = bm->getTailBlock(tableName);
     char *content;
     if (tailBlockID >= 0) {
@@ -137,7 +137,7 @@ int RecordManager::insertRecord(const Table &table, const Tuple &record) {
 }
 int RecordManager::selectRecord(const Table &table, const vector<string> &attr, const vector<Cond> &cond) {
     int blockID = 0;
-    char *block = bm->getBlock(table.Name + ".db", blockID);
+    char *block = bm->getBlock(table.Name + ".tb", blockID);
     int length = table.recordLength + 1;
     int blocks = BlockSize / length;
     Tuple tup;
@@ -153,9 +153,9 @@ int RecordManager::selectRecord(const Table &table, const vector<string> &attr, 
                 res.row.push_back(row);
             }
         }
-        bm->setFree(table.Name + ".db", blockID);
+        bm->setFree(table.Name + ".tb", blockID);
         blockID++;
-        block = bm->getBlock(table.Name + ".db", blockID);
+        block = bm->getBlock(table.Name + ".tb", blockID);
     }
 
     dumpResult(res);
@@ -164,7 +164,7 @@ int RecordManager::selectRecord(const Table &table, const vector<string> &attr, 
 
 int RecordManager::selectRecord(const Table &table, const vector<string> &attr, const vector<Cond> &cond,
                                  const IndexHint &indexHint, bool printResult) {
-    string tableFileName = table.Name + ".db";
+    string tableFileName = table.Name + ".tb";
     string indexFileName = table.Name + "_" + indexHint.attrName + ".ind";
     int recordPos;
     if (indexHint.cond.cond == MINISQL_COND_LESS || indexHint.cond.cond == MINISQL_COND_LEQUAL) {
@@ -229,7 +229,7 @@ int RecordManager::selectRecord(const Table &table, const vector<string> &attr, 
 //TODO
 bool RecordManager::deleteRecord(const Table &table, const vector<Cond> &cond) {
     int blockOffset = 0;
-    char *block = bm->getBlock(table.Name + ".db", blockOffset);
+    char *block = bm->getBlock(table.Name + ".tb", blockOffset);
     int length = table.recordLength + 1;
     int blocks = BlockSize / length;
     Tuple tup;
@@ -249,10 +249,10 @@ bool RecordManager::deleteRecord(const Table &table, const vector<Cond> &cond) {
                 }
             }
         }
-        bm->setDirty(table.Name + ".db", blockOffset);
-        bm->setFree(table.Name + ".db", blockOffset);
+        bm->setDirty(table.Name + ".tb", blockOffset);
+        bm->setFree(table.Name + ".tb", blockOffset);
         blockOffset++;
-        block = bm->getBlock(table.Name + ".db", blockOffset);
+        block = bm->getBlock(table.Name + ".tb", blockOffset);
     }
 }
 
