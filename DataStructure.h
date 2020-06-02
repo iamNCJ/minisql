@@ -7,6 +7,8 @@
 namespace MiniSqlBasic {
     const int BlockSize = 4096;
     const int MaxBlocks = 128;
+    const char UnUsed = 0;
+    const char Used = 1;
 
     enum class SqlValueTypeBase {
         Integer,
@@ -156,6 +158,67 @@ namespace MiniSqlBasic {
         std::string name;
         Operator op;
         SqlValue val;
+    };
+
+    typedef struct SqlValue Element;
+
+    struct Row {
+        std::vector<std::string> col;
+    };
+
+    struct Result {
+        std::vector<Row> row;
+    };
+
+    struct Tuple {
+        std::vector<Element> element;
+
+        Row fetchRow(const std::vector<std::string> &attrTable, const std::vector<std::string> &attrFetch) const {
+            Row row;
+            bool attrFound;
+            row.col.reserve(attrFetch.size());
+            for (auto fetch : attrFetch) {
+                attrFound = false;
+                for (int i = 0; i < attrTable.size(); i++) {
+                    if (fetch == attrTable[i]) {
+                        row.col.push_back(element[i].toStr());
+                        attrFound = true;
+                        break;
+                    }
+                }
+                if (!attrFound) {
+                    std::cerr << "Undefined attr in row fetching!!" << std::endl;
+                }
+            }
+            return row;
+        }
+
+        const Element &fetchElement(const std::vector<std::string> &attrTable, const std::string &attrFetch) const {
+            for (int i = 0; i < attrTable.size(); i++) {
+                if (attrFetch == attrTable[i]) {
+                    return element[i];
+                }
+            }
+            std::cerr << "Undefined attr in element fetching from tuple!!" << std::endl;
+        }
+    };
+
+    struct Table {
+        Table() {};
+
+        std::string Name;
+        int attrCnt, recordLength, recordCnt, size;
+
+        std::vector<SqlValueType> attrType;
+        std::vector<std::string> attrNames;
+        std::vector<std::pair<std::string, std::string>> index;
+
+        friend std::ostream &operator<<(std::ostream &os, const Table &table) {
+            os << "Name: " << table.Name << " attrCnt: " << table.attrCnt << " recordLength: " << table.recordLength
+                << " recordCnt: " << table.recordCnt << " size: " << table.size
+                << " attrNames: " << table.attrNames.size();
+            return os;
+        }
     };
 }
 
