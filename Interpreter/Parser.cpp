@@ -101,10 +101,14 @@ void Parser::exec(const std::vector<std::string> &args) {
     } else if (getLower(args.at(0)) == "drop") { // Drop
         execDrop(args);
     } else if (getLower(args.at(0)) == "create") { // Create
-        if (args.at(1) == "index") { // create index
-            execCreateIndex(args);
-        } else if (args.at(1) == "table") { // create table
-            execCreateTable(args);
+        try {
+            if (args.at(1) == "index") { // create index
+                execCreateIndex(args);
+            } else if (args.at(1) == "table") { // create table
+                execCreateTable(args);
+            }
+        } catch (std::out_of_range) {
+            throw std::runtime_error("SYNTAX ERROR: You have an error in your SQL syntax");
         }
     } else if (getLower(args.at(0)) == "insert") { // Insert
         execInsert(args);
@@ -128,11 +132,17 @@ void Parser::execSelect(const std::vector<std::string> &args) {
     std::vector<MiniSqlBasic::Condition> conditions;
 
     auto _cm = API::getCatalogManager();
+    std::string tableName;
 
     // everything in the world should be select * from !!!
     auto it = std::find(args.begin(), args.end(), "from");
     int distance = it - args.begin();
-    std::string tableName = args[distance + 1];
+    try {
+        tableName = args.at(distance + 1);
+    } catch (std::out_of_range) {
+        std::cout << "You have an error in your SQL syntax" << std::endl;
+        return; // TODO make it more elegent
+    }
 
     // check and get table
     if (!_cm->ExistTable(tableName)) {
@@ -206,7 +216,8 @@ void Parser::execSelect(const std::vector<std::string> &args) {
     auto start_time = std::chrono::system_clock::now();
     API::select(tableName, conditions);
     auto finish_time = std::chrono::system_clock::now();
-    std::cout << "(" << std::chrono::duration_cast<std::chrono::milliseconds>(finish_time - start_time).count() << " ms)" << std::endl;
+    std::cout << "(" << std::chrono::duration_cast<std::chrono::milliseconds>(finish_time - start_time).count()
+              << " ms)" << std::endl;
 }
 
 /**
@@ -217,11 +228,17 @@ void Parser::execDelete(const std::vector<std::string> &args) {
     std::vector<MiniSqlBasic::Condition> conditions;
 
     auto _cm = API::getCatalogManager();
+    std::string tableName;
 
     // everything in the world should be delete from !!!
     auto it = std::find(args.begin(), args.end(), "from");
     int distance = it - args.begin();
-    std::string tableName = args[distance + 1];
+    try {
+        tableName = args.at(distance + 1);
+    } catch (std::out_of_range) {
+        std::cout << "You have an error in your SQL syntax" << std::endl;
+        return; // TODO make it more elegent
+    }
 
     // check and get table
     if (!_cm->ExistTable(tableName)) {
@@ -295,7 +312,8 @@ void Parser::execDelete(const std::vector<std::string> &args) {
     auto start_time = std::chrono::system_clock::now();
     API::deleteOp(tableName, conditions);
     auto finish_time = std::chrono::system_clock::now();
-    std::cout << "(" << std::chrono::duration_cast<std::chrono::milliseconds>(finish_time - start_time).count() << " ms)" << std::endl;
+    std::cout << "(" << std::chrono::duration_cast<std::chrono::milliseconds>(finish_time - start_time).count()
+              << " ms)" << std::endl;
 }
 
 /**
@@ -309,13 +327,15 @@ void Parser::execDrop(const std::vector<std::string> &args) {
             auto start_time = std::chrono::system_clock::now();
             API::dropTable(args.at(2));
             auto finish_time = std::chrono::system_clock::now();
-            std::cout << "(" << std::chrono::duration_cast<std::chrono::milliseconds>(finish_time - start_time).count() << " ms)" << std::endl;
+            std::cout << "(" << std::chrono::duration_cast<std::chrono::milliseconds>(finish_time - start_time).count()
+                      << " ms)" << std::endl;
         } else if (args.at(1) == "index") {
             // call api && timer
             auto start_time = std::chrono::system_clock::now();
             API::dropIndex(args.at(2));
             auto finish_time = std::chrono::system_clock::now();
-            std::cout << "(" << std::chrono::duration_cast<std::chrono::milliseconds>(finish_time - start_time).count() << " ms)" << std::endl;
+            std::cout << "(" << std::chrono::duration_cast<std::chrono::milliseconds>(finish_time - start_time).count()
+                      << " ms)" << std::endl;
         } else {
             throw std::runtime_error("SYNTAX ERROR: You have an error in your SQL syntax");
             return;
@@ -339,7 +359,8 @@ void Parser::execCreateIndex(const vector<std::string> &args) {
         auto start_time = std::chrono::system_clock::now();
         API::createIndex(tableName, attrName, indexName, true);
         auto finish_time = std::chrono::system_clock::now();
-        std::cout << "(" << std::chrono::duration_cast<std::chrono::milliseconds>(finish_time - start_time).count() << " ms)" << std::endl;
+        std::cout << "(" << std::chrono::duration_cast<std::chrono::milliseconds>(finish_time - start_time).count()
+                  << " ms)" << std::endl;
     } catch (std::out_of_range) {
         throw std::runtime_error("SYNTAX ERROR: You have an error in your SQL syntax");
     }
@@ -402,7 +423,8 @@ void Parser::execCreateTable(const vector<std::string> &args) {
         auto start_time = std::chrono::system_clock::now();
         API::createTable(tableName, attrList, primaryKey);
         auto finish_time = std::chrono::system_clock::now();
-        std::cout << "(" << std::chrono::duration_cast<std::chrono::milliseconds>(finish_time - start_time).count() << " ms)" << std::endl;
+        std::cout << "(" << std::chrono::duration_cast<std::chrono::milliseconds>(finish_time - start_time).count()
+                  << " ms)" << std::endl;
     } catch (std::out_of_range) {
         throw std::runtime_error("SYNTAX ERROR: You have an error in your SQL syntax!");
     }
@@ -453,7 +475,8 @@ void Parser::execInsert(const vector<std::string> &args) {
         auto start_time = std::chrono::system_clock::now();
         API::insert(tableName, valueList);
         auto finish_time = std::chrono::system_clock::now();
-        std::cout << "(" << std::chrono::duration_cast<std::chrono::milliseconds>(finish_time - start_time).count() << " ms)" << std::endl;
+        std::cout << "(" << std::chrono::duration_cast<std::chrono::milliseconds>(finish_time - start_time).count()
+                  << " ms)" << std::endl;
     } catch (std::out_of_range) {
         throw std::runtime_error("SYNTAX ERROR: You have an error in your SQL syntax!");
     }
