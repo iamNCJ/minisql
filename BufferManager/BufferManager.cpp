@@ -14,10 +14,10 @@ BufferManager::BufferManager() {
 
 int BufferManager::getTailBlock(string filename) {
     struct stat st;
-    if (!stat(filename.c_str(), &st)) {
+    if (stat(filename.c_str(), &st) == 0) {
         return st.st_size / BlockSize - 1;
     }
-    cerr << "Failed to get number of blocks in file" + filename << endl;
+    cerr << "Failed to get number of blocks in file " + filename << endl;
 }
 
 void BufferManager::setDirty(const string &filename, unsigned int blockID) {
@@ -36,7 +36,7 @@ char *BufferManager::getBlock(string filename, unsigned int offset, bool allocat
 
     fstream fp;
     fp.open(filename, ios::in | ios::out | ios::binary);
-    if (!fp.good()) cerr << "Fail to open:" << filename;
+    if (!fp.good()) cerr << "Fail to open: " << filename << endl;
     fp.seekg(ios_base::end);
     int blockOffset = getTailBlock(filename) + 1;
     if (offset >= blockOffset) {
