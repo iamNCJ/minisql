@@ -1,8 +1,10 @@
 #ifndef MINISQL_DATASTRUCTURE_H
 #define MINISQL_DATASTRUCTURE_H
 
+#include <iostream>
 #include <string>
 #include <stdexcept>
+#include <vector>
 
 namespace MiniSqlBasic {
     const int BlockSize = 4096;
@@ -207,18 +209,24 @@ namespace MiniSqlBasic {
         Table() {};
 
         std::string Name;
-        int attrCnt, recordLength, recordCnt, size;
+        int attrCount, recordLength, recordCnt, size;
 
         std::vector<SqlValueType> attrType;
         std::vector<std::string> attrNames;
         std::vector<std::pair<std::string, std::string>> index;
 
         friend std::ostream &operator<<(std::ostream &os, const Table &table) {
-            os << "Name: " << table.Name << " attrCnt: " << table.attrCnt << " recordLength: " << table.recordLength
+            os << "Name: " << table.Name << " attrCount: " << table.attrCount << " recordLength: " << table.recordLength
                 << " recordCnt: " << table.recordCnt << " size: " << table.size
                 << " attrNames: " << table.attrNames.size();
             return os;
         }
+    };
+
+    struct IndexHint {
+        Condition cond;
+        std::string attrName;
+        int attrType;
     };
 }
 
