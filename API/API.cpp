@@ -456,7 +456,7 @@ CatalogManager *API::getCatalogManager() {
     return (cm == nullptr) ? cm = new CatalogManager() : cm;
 }
 
-void flushAll() {
-    auto bm = API::getBufferManager();
-    bm->flushAll();
+void API::flushAll() {
+    auto _bm = API::getBufferManager();
+    _bm->flushAll();
 }
