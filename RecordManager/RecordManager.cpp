@@ -265,6 +265,7 @@ void RecordManager::dumpResult(const Result &res) const {
         }
         cout << "\n";
     }
+    cout << res.row.size() << " selected. \n";
 }
 
 /*
