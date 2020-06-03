@@ -254,6 +254,7 @@ bool RecordManager::deleteRecord(const Table &table, const vector<Cond> &cond) {
         blockOffset++;
         block = bm->getBlock(table.Name + ".tb", blockOffset);
     }
+    return true;
 }
 
 //@ Output the result
