@@ -320,7 +320,7 @@ API::createIndex(const std::string &tableName, const std::string &attrName, cons
             // auto gen, not error
             if (index.second.find("autoIndex_") == 0) {
                 index.second = indexName;
-                std::cout << "Create index" << indexName << " success" << std::endl;
+                std::cout << "Create index " << indexName << " success" << std::endl;
                 return true;
             }
             // manually gen index, error
