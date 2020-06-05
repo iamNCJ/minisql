@@ -142,7 +142,7 @@ void Parser::execSelect(const std::vector<std::string> &args) {
     try {
         tableName = args.at(distance + 1);
     } catch (std::out_of_range) {
-        std::cout << "You have an error in your SQL syntax" << std::endl;
+        std::cerr << "You have an error in your SQL syntax" << std::endl;
         return; // TODO make it more elegent
     }
 
@@ -172,7 +172,7 @@ void Parser::execSelect(const std::vector<std::string> &args) {
         } else if (args.at(i) == "=") {
             op = MiniSqlBasic::Operator::EQ_OP;
         } else {
-            std::cout << "You have an error in your SQL syntax" << std::endl;
+            std::cerr << "You have an error in your SQL syntax" << std::endl;
             return; // TODO make it more elegent
         }
         i++;
@@ -201,7 +201,7 @@ void Parser::execSelect(const std::vector<std::string> &args) {
                     break;
             }
         } catch (...) {
-            std::cout << "You have an error in your SQL syntax" << std::endl;
+            std::cerr << "You have an error in your SQL syntax" << std::endl;
             return; // TODO make it more elegant
         }
 
@@ -220,7 +220,7 @@ void Parser::execSelect(const std::vector<std::string> &args) {
     auto finish_time = std::chrono::high_resolution_clock::now();
     int tempTime = std::chrono::duration_cast<std::chrono::milliseconds>(finish_time - start_time).count();
     if (tempTime == 0) tempTime = 1;
-    std::cout << "(" << setiosflags(ios::fixed) << setprecision(4) << tempTime * 1.0 / 1000.0 << " s)" << std::endl;
+    std::cerr << "(" << setiosflags(ios::fixed) << setprecision(4) << tempTime * 1.0 / 1000.0 << " s)" << std::endl;
 }
 
 /**

@@ -11,7 +11,7 @@
 class Interpreter {
 public:
     Interpreter() = default;
-    void main_loop [[noreturn]]();
+    void main_loop [[noreturn]](bool singleMode = false);
 
 private:
     Parser parser;

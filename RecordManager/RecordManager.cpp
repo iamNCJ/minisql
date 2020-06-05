@@ -261,14 +261,34 @@ bool RecordManager::deleteRecord(const Table &table, const vector<Cond> &cond) {
 
 //@ Output the result
 void RecordManager::dumpResult(const Result &res) const {
-    for (auto const &row : res.row) {
-        cout << " | ";
-        for (auto const &col : row.col) {
-            cout << col << " | ";
-        }
-        cout << "\n";
+    char *p;
+    bool singleMode = false;
+    p = getenv("MINISQL_MODE");
+    if(p && strcmp(p, "SINGLE") == 0) {
+        singleMode = true;
     }
-    cout << res.row.size() << " selected. \n";
+
+    if (singleMode) {
+        cout << "[";
+        for (auto const &row : res.row) {
+            cout << "[";
+            for (auto const &col : row.col) {
+                cout << "'" << col << "',";
+            }
+            cout << "],";
+        }
+        cout << "]";
+        cerr << res.row.size() << " selected. \n";
+    } else {
+        for (auto const &row : res.row) {
+            cout << " | ";
+            for (auto const &col : row.col) {
+                cout << col << " | ";
+            }
+            cout << "\n";
+        }
+        cerr << res.row.size() << " selected. \n";
+    }
 }
 
 /*
