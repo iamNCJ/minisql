@@ -4,6 +4,8 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <algorithm>
+#include <iterator>
 #include "../DataStructure.h"
 #include "../BufferManager/BufferManager.h"
 #include "../IndexManager/IndexManager.h"

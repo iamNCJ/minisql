@@ -31,7 +31,6 @@ bool RecordManager::createIndex(const Table &table, const SqlValueType &index) {
         }
         offset += attrType.getSize();
     }
-
     while (block) {
         for (int i = 0; i < recordsPerBlock; i++) {
             if (block[i * length] != Used) { continue; }
@@ -39,12 +38,14 @@ bool RecordManager::createIndex(const Table &table, const SqlValueType &index) {
             switch (attr.M()) {
                 case MINISQL_TYPE_INT:
                     memcpy(&attr.i, dest, attr.type.getSize());
+                    cout << attr.i << '\n';
                     break;
                 case MINISQL_TYPE_FLOAT:
                     memcpy(&attr.r, dest, attr.type.getSize());
+                    cout << attr.r << '\n';
                     break;
                 case MINISQL_TYPE_CHAR:
-                    memcpy(const_cast<char *>(attr.str.c_str()), dest, attr.type.getSize());
+                    attr.str.replace(0, attr.type.getSize(), dest);
                     break;
                 default:
                     cerr << "Undefined type in RM::createIndex." << endl;
@@ -55,6 +56,7 @@ bool RecordManager::createIndex(const Table &table, const SqlValueType &index) {
         blockID++;
         block = bm->getBlock(table.Name + ".tb", blockID);
     }
+    return true;
 }
 
 bool RecordManager::dropIndex(const Table &table, const string &index) {
@@ -167,7 +169,7 @@ int RecordManager::selectRecord(const Table &table, const vector<string> &attr, 
     string tableFileName = table.Name + ".tb";
     string indexFileName = table.Name + "_" + indexHint.attrName + ".ind";
     int recordPos;
-    if (indexHint.cond.cond == MINISQL_COND_LESS || indexHint.cond.cond == MINISQL_COND_LEQUAL) {
+    if (indexHint.cond.cond == MINISQL_COND_LESS || indexHint.cond.cond == MINISQL_COND_LEQUAL || indexHint.cond.cond == MINISQL_COND_UEQUAL) {
         recordPos = im->searchHead(indexFileName, indexHint.attrType);
     } else {
         recordPos = im->search(indexFileName, indexHint.cond.value);
@@ -201,7 +203,7 @@ int RecordManager::selectRecord(const Table &table, const vector<string> &attr, 
                     bm->setFree(tableFileName, blockID);
                     break;
                 }
-            } else if (!indexHint.cond.test(e)) {
+            } else if (indexHint.cond.cond == MINISQL_COND_EQUAL && !indexHint.cond.test(e)) {
                 bm->setFree(tableFileName, blockID);
                 break;
             }
