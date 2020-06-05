@@ -38,11 +38,11 @@ bool RecordManager::createIndex(const Table &table, const SqlValueType &index) {
             switch (attr.M()) {
                 case MINISQL_TYPE_INT:
                     memcpy(&attr.i, dest, attr.type.getSize());
-                    cout << attr.i << '\n';
+//                    cout << attr.i << '\n';
                     break;
                 case MINISQL_TYPE_FLOAT:
                     memcpy(&attr.r, dest, attr.type.getSize());
-                    cout << attr.r << '\n';
+//                    cout << attr.r << '\n';
                     break;
                 case MINISQL_TYPE_CHAR:
                     attr.str.replace(0, attr.type.getSize(), dest);
