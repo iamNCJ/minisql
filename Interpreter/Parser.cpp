@@ -220,7 +220,7 @@ void Parser::execSelect(const std::vector<std::string> &args) {
     auto finish_time = std::chrono::high_resolution_clock::now();
     int tempTime = std::chrono::duration_cast<std::chrono::milliseconds>(finish_time - start_time).count();
     if (tempTime == 0) tempTime = 1;
-    std::cout << "(" << setiosflags(ios::fixed) << setprecision(4) << tempTime * 1.0 / 1000.0 << " s)" << std::endl;
+    std::cerr << "(" << setiosflags(ios::fixed) << setprecision(4) << tempTime * 1.0 / 1000.0 << " s)" << std::endl;
 }
 
 /**
@@ -317,7 +317,7 @@ void Parser::execDelete(const std::vector<std::string> &args) {
     auto finish_time = std::chrono::high_resolution_clock::now();
     int tempTime = std::chrono::duration_cast<std::chrono::milliseconds>(finish_time - start_time).count();
     if (tempTime == 0) tempTime = 1;
-    std::cout << "(" << setiosflags(ios::fixed) << setprecision(4) << tempTime * 1.0 / 1000.0 << " s)" << std::endl;
+    std::cerr << "(" << setiosflags(ios::fixed) << setprecision(4) << tempTime * 1.0 / 1000.0 << " s)" << std::endl;
 }
 
 /**
@@ -333,7 +333,7 @@ void Parser::execDrop(const std::vector<std::string> &args) {
             auto finish_time = std::chrono::high_resolution_clock::now();
             int tempTime = std::chrono::duration_cast<std::chrono::milliseconds>(finish_time - start_time).count();
             if (tempTime == 0) tempTime = 1;
-            std::cout << "(" << setiosflags(ios::fixed) << setprecision(4) << tempTime * 1.0 / 1000.0 << " s)" << std::endl;
+            std::cerr << "(" << setiosflags(ios::fixed) << setprecision(4) << tempTime * 1.0 / 1000.0 << " s)" << std::endl;
         } else if (args.at(1) == "index") {
             // call api && timer
             auto start_time = std::chrono::high_resolution_clock::now();
@@ -341,7 +341,7 @@ void Parser::execDrop(const std::vector<std::string> &args) {
             auto finish_time = std::chrono::high_resolution_clock::now();
             int tempTime = std::chrono::duration_cast<std::chrono::milliseconds>(finish_time - start_time).count();
             if (tempTime == 0) tempTime = 1;
-            std::cout << "(" << setiosflags(ios::fixed) << setprecision(4) << tempTime * 1.0 / 1000.0 << " s)" << std::endl;
+            std::cerr << "(" << setiosflags(ios::fixed) << setprecision(4) << tempTime * 1.0 / 1000.0 << " s)" << std::endl;
         } else {
             throw std::runtime_error("SYNTAX ERROR: You have an error in your SQL syntax");
             return;
@@ -367,7 +367,7 @@ void Parser::execCreateIndex(const vector<std::string> &args) {
         auto finish_time = std::chrono::high_resolution_clock::now();
         int tempTime = std::chrono::duration_cast<std::chrono::milliseconds>(finish_time - start_time).count();
         if (tempTime == 0) tempTime = 1;
-        std::cout << "(" << setiosflags(ios::fixed) << setprecision(4) << tempTime * 1.0 / 1000.0 << " s)" << std::endl;
+        std::cerr << "(" << setiosflags(ios::fixed) << setprecision(4) << tempTime * 1.0 / 1000.0 << " s)" << std::endl;
     } catch (std::out_of_range) {
         throw std::runtime_error("SYNTAX ERROR: You have an error in your SQL syntax");
     }
@@ -432,7 +432,7 @@ void Parser::execCreateTable(const vector<std::string> &args) {
         auto finish_time = std::chrono::high_resolution_clock::now();
         int tempTime = std::chrono::duration_cast<std::chrono::milliseconds>(finish_time - start_time).count();
         if (tempTime == 0) tempTime = 1;
-        std::cout << "(" << setiosflags(ios::fixed) << setprecision(4) << tempTime * 1.0 / 1000.0 << " s)" << std::endl;
+        std::cerr << "(" << setiosflags(ios::fixed) << setprecision(4) << tempTime * 1.0 / 1000.0 << " s)" << std::endl;
     } catch (std::out_of_range) {
         throw std::runtime_error("SYNTAX ERROR: You have an error in your SQL syntax!");
     }
@@ -485,7 +485,7 @@ void Parser::execInsert(const vector<std::string> &args) {
         auto finish_time = std::chrono::high_resolution_clock::now();
         int tempTime = std::chrono::duration_cast<std::chrono::milliseconds>(finish_time - start_time).count();
         if (tempTime == 0) tempTime = 1;
-        std::cout << "(" << setiosflags(ios::fixed) << setprecision(3) << tempTime * 1.0 / 1000.0 << " s)" << std::endl;
+        std::cerr << "(" << setiosflags(ios::fixed) << setprecision(3) << tempTime * 1.0 / 1000.0 << " s)" << std::endl;
     } catch (std::out_of_range) {
         throw std::runtime_error("SYNTAX ERROR: You have an error in your SQL syntax!");
     }
