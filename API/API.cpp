@@ -57,7 +57,7 @@ int API::insert(const std::string &tableName, std::vector<MiniSqlBasic::SqlValue
 
     for (auto &index : table.index) {
         for (auto &value : valueList) {
-            if (value.type.attrName != index.second) { continue; }
+            if (value.type.attrName != index.first || table.recordCnt == 0) { continue; }
             condition.value = value;
             condition.attr = value.type.attrName;
             uniqueTest.attrName = condition.attr;

@@ -182,7 +182,7 @@ void CatalogManager::CreateTable(const std::string &TableName,
     table.recordLength = len;
     table.recordCnt = 0;
 
-    // Setup index
+//    // Setup index
 //    for (auto &type: table.attrType) {
 //        if (type.unique && !type.primary) {
 //            table.index.emplace_back(std::make_pair(type.attrName, std::string("autoIndex_") + (autoIndex++)));
