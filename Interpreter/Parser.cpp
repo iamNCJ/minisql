@@ -110,7 +110,7 @@ void Parser::exec(const std::vector<std::string> &args) {
                 execCreateTable(args);
             }
         } catch (std::out_of_range) {
-            throw std::runtime_error("SYNTAX ERROR: You have an error in your SQL syntax");
+            throw std::runtime_error("SYNTAX ERROR: You have an error in your SQL syntax, create table or create index is needed!");
         }
     } else if (getLower(args.at(0)) == "insert") { // Insert
         execInsert(args);
@@ -118,10 +118,10 @@ void Parser::exec(const std::vector<std::string> &args) {
         try {
             execFile(args.at(1));
         } catch (std::out_of_range) {
-            throw std::runtime_error("SYNTAX ERROR: You have an error in your SQL syntax");
+            throw std::runtime_error("SYNTAX ERROR: You have an error in your SQL syntax, you need to specify the file to exec!");
         }
     } else {
-        throw std::runtime_error("SYNTAX ERROR: You have an error in your SQL syntax");
+        throw std::runtime_error("SYNTAX ERROR: You have an error in your SQL syntax, command " + args.at(0) + "not found!");
     }
 
 }
@@ -142,14 +142,14 @@ void Parser::execSelect(const std::vector<std::string> &args) {
     try {
         tableName = args.at(distance + 1);
     } catch (std::out_of_range) {
-        std::cout << "You have an error in your SQL syntax" << std::endl;
-        return; // TODO make it more elegent
+        throw std::runtime_error("SYNTAX ERROR: You have an error in your SQL syntax, select command needs a table name!");
+//        return;
     }
 
     // check and get table
     if (!_cm->ExistTable(tableName)) {
-        std::cout << "Table " << tableName << " not found!" << std::endl;
-        return;
+        throw std::runtime_error("Error! Table " + tableName + " not found!");
+//        return;
     }
     auto &table = _cm->GetTable(tableName);
 
@@ -172,8 +172,8 @@ void Parser::execSelect(const std::vector<std::string> &args) {
         } else if (args.at(i) == "=") {
             op = MiniSqlBasic::Operator::EQ_OP;
         } else {
-            std::cout << "You have an error in your SQL syntax" << std::endl;
-            return; // TODO make it more elegent
+            throw std::runtime_error("SYNTAX ERROR: Unknown operator!");
+//            return; // TODO make it more elegent
         }
         i++;
 
@@ -185,7 +185,7 @@ void Parser::execSelect(const std::vector<std::string> &args) {
                 if (table.attrType.at(j).attrName == attr) break;
             }
             if (j == table.attrType.size()) {
-                throw std::runtime_error("Attribute not found!");
+                throw std::runtime_error("Attribute(s) not found!");
             }
             SqlValueType type = table.attrType.at(j);
             val.type = type;
@@ -201,8 +201,8 @@ void Parser::execSelect(const std::vector<std::string> &args) {
                     break;
             }
         } catch (...) {
-            std::cout << "You have an error in your SQL syntax" << std::endl;
-            return; // TODO make it more elegant
+            throw std::runtime_error("SYNTAX ERROR: Value type unknown! We only support char, int, float!");
+//            return; // TODO make it more elegant
         }
 
         Condition condition;
@@ -218,9 +218,9 @@ void Parser::execSelect(const std::vector<std::string> &args) {
     auto start_time = std::chrono::high_resolution_clock::now();
     API::select(tableName, conditions);
     auto finish_time = std::chrono::high_resolution_clock::now();
-    int tempTime = std::chrono::duration_cast<std::chrono::milliseconds>(finish_time - start_time).count();
+    int tempTime = std::chrono::duration_cast<std::chrono::nanoseconds>(finish_time - start_time).count();
     if (tempTime == 0) tempTime = 1;
-    std::cerr << "(" << setiosflags(ios::fixed) << setprecision(4) << tempTime * 1.0 / 1000.0 << " s)" << std::endl;
+    std::cerr << "(" << setiosflags(ios::fixed) << setw(9) << setprecision(9) << tempTime * 1e-9 << " s)" << std::endl;
 }
 
 /**
@@ -239,8 +239,8 @@ void Parser::execDelete(const std::vector<std::string> &args) {
     try {
         tableName = args.at(distance + 1);
     } catch (std::out_of_range) {
-        std::cout << "You have an error in your SQL syntax" << std::endl;
-        return; // TODO make it more elegent
+        throw std::runtime_error("SYNTAX ERROR: You have an error in your SQL syntax, delete command needs a table name!");
+//        return; // TODO make it more elegent
     }
 
     // check and get table
@@ -269,8 +269,8 @@ void Parser::execDelete(const std::vector<std::string> &args) {
         } else if (args.at(i) == "=") {
             op = MiniSqlBasic::Operator::EQ_OP;
         } else {
-            std::cout << "You have an error in your SQL syntax" << std::endl;
-            return; // TODO make it more elegent
+            throw std::runtime_error("SYNTAX ERROR: Unknown operator!");
+//            return; // TODO make it more elegent
         }
         i++;
 
@@ -298,8 +298,8 @@ void Parser::execDelete(const std::vector<std::string> &args) {
                     break;
             }
         } catch (...) {
-            std::cout << "You have an error in your SQL syntax" << std::endl;
-            return; // TODO make it more elegent
+            throw std::runtime_error("TYPE ERROR: Wrong type!");
+//            return; // TODO make it more elegent
         }
 
         Condition condition;
@@ -315,9 +315,9 @@ void Parser::execDelete(const std::vector<std::string> &args) {
     auto start_time = std::chrono::high_resolution_clock::now();
     API::deleteOp(tableName, conditions);
     auto finish_time = std::chrono::high_resolution_clock::now();
-    int tempTime = std::chrono::duration_cast<std::chrono::milliseconds>(finish_time - start_time).count();
+    int tempTime = std::chrono::duration_cast<std::chrono::nanoseconds>(finish_time - start_time).count();
     if (tempTime == 0) tempTime = 1;
-    std::cerr << "(" << setiosflags(ios::fixed) << setprecision(4) << tempTime * 1.0 / 1000.0 << " s)" << std::endl;
+    std::cerr << "(" << setiosflags(ios::fixed) << setw(9) << setprecision(9) << tempTime * 1e-9 << " s)" << std::endl;
 }
 
 /**
@@ -331,23 +331,23 @@ void Parser::execDrop(const std::vector<std::string> &args) {
             auto start_time = std::chrono::high_resolution_clock::now();
             API::dropTable(args.at(2));
             auto finish_time = std::chrono::high_resolution_clock::now();
-            int tempTime = std::chrono::duration_cast<std::chrono::milliseconds>(finish_time - start_time).count();
+            int tempTime = std::chrono::duration_cast<std::chrono::nanoseconds>(finish_time - start_time).count();
             if (tempTime == 0) tempTime = 1;
-            std::cerr << "(" << setiosflags(ios::fixed) << setprecision(4) << tempTime * 1.0 / 1000.0 << " s)" << std::endl;
+            std::cerr << "(" << setiosflags(ios::fixed) << setw(9) << setprecision(9) << tempTime * 1e-9 << " s)" << std::endl;
         } else if (args.at(1) == "index") {
             // call api && timer
             auto start_time = std::chrono::high_resolution_clock::now();
             API::dropIndex(args.at(2));
             auto finish_time = std::chrono::high_resolution_clock::now();
-            int tempTime = std::chrono::duration_cast<std::chrono::milliseconds>(finish_time - start_time).count();
+            int tempTime = std::chrono::duration_cast<std::chrono::nanoseconds>(finish_time - start_time).count();
             if (tempTime == 0) tempTime = 1;
-            std::cerr << "(" << setiosflags(ios::fixed) << setprecision(4) << tempTime * 1.0 / 1000.0 << " s)" << std::endl;
+            std::cerr << "(" << setiosflags(ios::fixed) << setw(9) << setprecision(9) << tempTime * 1e-9 << " s)" << std::endl;
         } else {
-            throw std::runtime_error("SYNTAX ERROR: You have an error in your SQL syntax");
-            return;
+            throw std::runtime_error("SYNTAX ERROR: You have an error in your SQL syntax, drop index or drop table!");
+//            return;
         }
     } catch (std::out_of_range) {
-        throw std::runtime_error("SYNTAX ERROR: You have an error in your SQL syntax");
+        throw std::runtime_error("SYNTAX ERROR: You have an error in your SQL syntax (Drop)");
     }
 }
 
@@ -365,11 +365,11 @@ void Parser::execCreateIndex(const vector<std::string> &args) {
         auto start_time = std::chrono::high_resolution_clock::now();
         API::createIndex(tableName, attrName, indexName, true);
         auto finish_time = std::chrono::high_resolution_clock::now();
-        int tempTime = std::chrono::duration_cast<std::chrono::milliseconds>(finish_time - start_time).count();
+        int tempTime = std::chrono::duration_cast<std::chrono::nanoseconds>(finish_time - start_time).count();
         if (tempTime == 0) tempTime = 1;
-        std::cerr << "(" << setiosflags(ios::fixed) << setprecision(4) << tempTime * 1.0 / 1000.0 << " s)" << std::endl;
+        std::cerr << "(" << setiosflags(ios::fixed) << setw(9) << setprecision(9) << tempTime * 1e-9 << " s)" << std::endl;
     } catch (std::out_of_range) {
-        throw std::runtime_error("SYNTAX ERROR: You have an error in your SQL syntax");
+        throw std::runtime_error("SYNTAX ERROR: You have an error in your SQL syntax (create index)");
     }
 }
 
@@ -430,11 +430,11 @@ void Parser::execCreateTable(const vector<std::string> &args) {
         auto start_time = std::chrono::high_resolution_clock::now();
         API::createTable(tableName, attrList, primaryKey);
         auto finish_time = std::chrono::high_resolution_clock::now();
-        int tempTime = std::chrono::duration_cast<std::chrono::milliseconds>(finish_time - start_time).count();
+        int tempTime = std::chrono::duration_cast<std::chrono::nanoseconds>(finish_time - start_time).count();
         if (tempTime == 0) tempTime = 1;
-        std::cerr << "(" << setiosflags(ios::fixed) << setprecision(4) << tempTime * 1.0 / 1000.0 << " s)" << std::endl;
+        std::cerr << "(" << setiosflags(ios::fixed) << setw(9) << setprecision(9) << tempTime * 1e-9 << " s)" << std::endl;
     } catch (std::out_of_range) {
-        throw std::runtime_error("SYNTAX ERROR: You have an error in your SQL syntax!");
+        throw std::runtime_error("SYNTAX ERROR: You have an error in your SQL syntax! (create table)");
     }
 }
 
@@ -450,8 +450,7 @@ void Parser::execInsert(const vector<std::string> &args) {
         auto _cm = API::getCatalogManager();
         // check and get table
         if (!_cm->ExistTable(tableName)) {
-            std::cout << "Table not " << tableName << " found!" << std::endl;
-            return;
+            throw std::runtime_error("Table not " + tableName + " found!");
         }
         auto &table = _cm->GetTable(tableName);
 
@@ -473,8 +472,8 @@ void Parser::execInsert(const vector<std::string> &args) {
                         break;
                 }
             } catch (...) {
-                std::cout << "You have an error in your SQL syntax" << std::endl;
-                return; // TODO make it more elegent
+                throw std::runtime_error("SYNTAX ERROR: Value type unknown! We only support char, int, float!");
+//                return; // TODO make it more elegent
             }
             valueList.push_back(val);
         }
@@ -483,11 +482,11 @@ void Parser::execInsert(const vector<std::string> &args) {
         auto start_time = std::chrono::high_resolution_clock::now();
         API::insert(tableName, valueList);
         auto finish_time = std::chrono::high_resolution_clock::now();
-        int tempTime = std::chrono::duration_cast<std::chrono::milliseconds>(finish_time - start_time).count();
-        if (tempTime == 0) tempTime = 1;
-        std::cerr << "(" << setiosflags(ios::fixed) << setprecision(3) << tempTime * 1.0 / 1000.0 << " s)" << std::endl;
+        int tempTime = std::chrono::duration_cast<std::chrono::nanoseconds>(finish_time - start_time).count();
+        if (tempTime == 0) tempTime = 10;
+        std::cerr << "(" << setiosflags(ios::fixed) << setw(9) << setprecision(9) << tempTime * 1e-9 << " s)" << std::endl;
     } catch (std::out_of_range) {
-        throw std::runtime_error("SYNTAX ERROR: You have an error in your SQL syntax!");
+        throw std::runtime_error("SYNTAX ERROR: You have an error in your SQL syntax! Insert command needs more arguments!");
     }
 }
 
@@ -503,7 +502,7 @@ void Parser::execFile(const std::string &fileName) {
         try {
             parser.inputLine(inputCmd);
         } catch (std::runtime_error &error) {
-            std::cout << "[Error] " << error.what() << std::endl;
+            std::cerr << "[Error] " << error.what() << std::endl;
             parser.flushBuffer();
         }
     }
