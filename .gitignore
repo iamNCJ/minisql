@@ -49,3 +49,5 @@ Makefile
 MiniSQL
 
 .DS_Store
+
+build
