@@ -142,13 +142,13 @@ void Parser::execSelect(const std::vector<std::string> &args) {
     try {
         tableName = args.at(distance + 1);
     } catch (std::out_of_range) {
-        std::cerr << "You have an error in your SQL syntax" << std::endl;
+        std::cout << "You have an error in your SQL syntax" << std::endl;
         return; // TODO make it more elegent
     }
 
     // check and get table
     if (!_cm->ExistTable(tableName)) {
-        std::cerr << "Table " << tableName << " not found!" << std::endl;
+        std::cout << "Table " << tableName << " not found!" << std::endl;
         return;
     }
     auto &table = _cm->GetTable(tableName);
@@ -172,7 +172,7 @@ void Parser::execSelect(const std::vector<std::string> &args) {
         } else if (args.at(i) == "=") {
             op = MiniSqlBasic::Operator::EQ_OP;
         } else {
-            std::cerr << "You have an error in your SQL syntax" << std::endl;
+            std::cout << "You have an error in your SQL syntax" << std::endl;
             return; // TODO make it more elegent
         }
         i++;
@@ -201,7 +201,7 @@ void Parser::execSelect(const std::vector<std::string> &args) {
                     break;
             }
         } catch (...) {
-            std::cerr << "You have an error in your SQL syntax" << std::endl;
+            std::cout << "You have an error in your SQL syntax" << std::endl;
             return; // TODO make it more elegant
         }
 
@@ -220,7 +220,7 @@ void Parser::execSelect(const std::vector<std::string> &args) {
     auto finish_time = std::chrono::high_resolution_clock::now();
     int tempTime = std::chrono::duration_cast<std::chrono::milliseconds>(finish_time - start_time).count();
     if (tempTime == 0) tempTime = 1;
-    std::cerr << "(" << setiosflags(ios::fixed) << setprecision(4) << tempTime * 1.0 / 1000.0 << " s)" << std::endl;
+    std::cout << "(" << setiosflags(ios::fixed) << setprecision(4) << tempTime * 1.0 / 1000.0 << " s)" << std::endl;
 }
 
 /**
@@ -245,7 +245,7 @@ void Parser::execDelete(const std::vector<std::string> &args) {
 
     // check and get table
     if (!_cm->ExistTable(tableName)) {
-        std::cerr << "Table not " << tableName << " found!" << std::endl;
+        std::cout << "Table not " << tableName << " found!" << std::endl;
         return;
     }
     auto &table = _cm->GetTable(tableName);
@@ -450,7 +450,7 @@ void Parser::execInsert(const vector<std::string> &args) {
         auto _cm = API::getCatalogManager();
         // check and get table
         if (!_cm->ExistTable(tableName)) {
-            std::cerr << "Table not " << tableName << " found!" << std::endl;
+            std::cout << "Table not " << tableName << " found!" << std::endl;
             return;
         }
         auto &table = _cm->GetTable(tableName);

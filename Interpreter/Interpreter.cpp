@@ -15,9 +15,12 @@ void Interpreter::main_loop(bool singleMode) {
         try {
             inputState = parser.inputLine(inputCmd);
         } catch (std::runtime_error &error) {
-            (singleMode ? std::cerr : std::cout) << "[Error] " << error.what() << std::endl;
+            std::cout << "[Error] " << error.what() << std::endl;
             parser.flushBuffer();
             inputState = true;
+        }
+        if (singleMode) {
+            exit(0);
         }
     }
 }

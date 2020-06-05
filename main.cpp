@@ -4,7 +4,6 @@
 #include "Interpreter.h"
 
 int main() {
-    std::cout << "Welcome to miniSQL!" << std::endl;
     Interpreter interpreter;
     char *p;
     bool singleMode = false;
@@ -12,5 +11,7 @@ int main() {
     if(p && strcmp(p, "SINGLE") == 0) {
         singleMode = true;
     }
+    if (!singleMode)
+        std::cout << "Welcome to miniSQL!" << std::endl;
     interpreter.main_loop(singleMode);
 }
