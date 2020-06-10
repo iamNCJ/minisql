@@ -51,3 +51,7 @@ MiniSQL
 .DS_Store
 
 build
+
+*.srctrlbm
+*.srctrldb
+*.srctrlprj

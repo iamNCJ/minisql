@@ -121,7 +121,7 @@ void Parser::exec(const std::vector<std::string> &args) {
             throw std::runtime_error("SYNTAX ERROR: You have an error in your SQL syntax, you need to specify the file to exec!");
         }
     } else {
-        throw std::runtime_error("SYNTAX ERROR: You have an error in your SQL syntax, command " + args.at(0) + "not found!");
+        throw std::runtime_error("SYNTAX ERROR: You have an error in your SQL syntax, command " + args.at(0) + " not found!");
     }
 
 }
