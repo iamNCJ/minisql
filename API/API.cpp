@@ -275,7 +275,7 @@ bool API::createTable(const std::string &tableName,
     }
 
     // call managers to create
-    auto res = _rm->createTable(tableName);
+    auto res = _rm->createTableFile(tableName);
     _cm->CreateTable(tableName, attrList, primaryKey);
     auto &tb = _cm->GetTable(tableName);
     if (isPrimaryIndex) {
@@ -382,7 +382,7 @@ bool API::dropTable(const std::string &tableName) {
     _cm->RemoveTable(table);
     _cm->WriteToFile();
     std::cout << "Table " << tableName << " dropped." << std::endl;
-    return _rm->dropTable(tableName);
+    return _rm->dropTableFile(tableName);
 }
 
 /**
