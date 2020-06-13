@@ -36,7 +36,7 @@ struct Block {
         blockID = _blockID;
     }
 
-    Block &flush() {
+    Block &write() {
         fstream fp;
         fp.open(filename, ios::in | ios::out | ios::binary);
         fp.seekg(blockID * BlockSize, ios::beg);
@@ -56,7 +56,7 @@ class BufferManager {
 
     Block &getFreeBlock();
 
-    Block &findPair(string filename, unsigned int blockID) const;
+    Block &fetchBlock(string filename, unsigned int blockID) const;
 
     int maxLRU;
 public:
@@ -70,7 +70,7 @@ public:
 
     char *getBlock(string filename, unsigned int blockID, bool allocate = false);
 
-    void flushAll();
+    void writeAll();
 
     void createFile(string filename);
 

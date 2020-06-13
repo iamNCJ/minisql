@@ -458,5 +458,5 @@ CatalogManager *API::getCatalogManager() {
 
 void API::flushAll() {
     auto _bm = API::getBufferManager();
-    _bm->flushAll();
+    _bm->writeAll();
 }
