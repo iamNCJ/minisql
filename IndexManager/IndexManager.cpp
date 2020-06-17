@@ -8,18 +8,21 @@ bool IndexManager::create(const string &filename, const SqlValueType &type) {
     int itemSize = type.getSize();
     int treeDegree = type.getDegree();
     switch (type.M()) {
-        case MINISQL_TYPE_INT:
-            intBPTree = new BPTree<int>(filename, itemSize, treeDegree);
-            intIndexMap.insert(intMap::value_type(filename, intBPTree));
+        case MINISQL_TYPE_INT: {
+            auto *intBpTree = new BPTree<int>(filename, itemSize, treeDegree);
+            intIndexMap.insert(map<string, BPTree<int> *>::value_type(filename, intBpTree));
             break;
-        case MINISQL_TYPE_FLOAT:
-            floatBPTree = new BPTree<float>(filename, itemSize, treeDegree);
-            floatIndexMap.insert(floatMap::value_type(filename, floatBPTree));
+        }
+        case MINISQL_TYPE_FLOAT: {
+            auto *floatBpTree = new BPTree<float>(filename, itemSize, treeDegree);
+            floatIndexMap.insert(map<string, BPTree<float> *>::value_type(filename, floatBpTree));
             break;
-        case MINISQL_TYPE_CHAR:
-            charBPTree = new BPTree<string>(filename, itemSize, treeDegree);
-            charIndexMap.insert(charMap::value_type(filename, charBPTree));
+        }
+        case MINISQL_TYPE_CHAR: {
+            auto *charBpTree = new BPTree<string>(filename, itemSize, treeDegree);
+            charIndexMap.insert(map<string, BPTree<string> *>::value_type(filename, charBpTree));
             break;
+        }
         default:
             cerr << "Undefined type!" << endl;
             break;
@@ -28,21 +31,24 @@ bool IndexManager::create(const string &filename, const SqlValueType &type) {
 
 bool IndexManager::drop(const string &filename, const SqlValueType &type) {
     switch (type.M()) {
-        case MINISQL_TYPE_INT:
-            intBPIterator = intIndexMap.find(filename);
-            delete intBPIterator->second;
-            intIndexMap.erase(intBPIterator);
+        case MINISQL_TYPE_INT: {
+            auto intBpIterator = intIndexMap.find(filename);
+            delete intBpIterator->second;
+            intIndexMap.erase(intBpIterator);
             break;
-        case MINISQL_TYPE_FLOAT:
-            floatBPIterator = floatIndexMap.find(filename);
-            delete floatBPIterator->second;
-            floatIndexMap.erase(floatBPIterator);
+        }
+        case MINISQL_TYPE_FLOAT: {
+            auto floatBpIterator = floatIndexMap.find(filename);
+            delete floatBpIterator->second;
+            floatIndexMap.erase(floatBpIterator);
             break;
-        case MINISQL_TYPE_CHAR:
-            charBPIterator = charIndexMap.find(filename);
-            delete charBPIterator->second;
-            charIndexMap.erase(charBPIterator);
+        }
+        case MINISQL_TYPE_CHAR: {
+            auto charBpIterator = charIndexMap.find(filename);
+            delete charBpIterator->second;
+            charIndexMap.erase(charBpIterator);
             break;
+        }
         default:
             cerr << "Undefined type!" << endl;
             break;
@@ -50,22 +56,22 @@ bool IndexManager::drop(const string &filename, const SqlValueType &type) {
 }
 
 int IndexManager::search(const string &filename, const Element &e) {
-    NodeSearchParse<int> intNode;
-    NodeSearchParse<float> floatNode;
-    NodeSearchParse<string> charNode;
     switch (e.type.M()) {
-        case MINISQL_TYPE_INT:
-            intNode = intIndexMap.find(filename)->second->findNode(e.i);
+        case MINISQL_TYPE_INT: {
+            NodeSearchParse<int> intNode = intIndexMap.find(filename)->second->findNode(e.i);
             intOffsetMap[filename] = intNode;
             return intNode.node->keyOffset[intNode.index];
-        case MINISQL_TYPE_FLOAT:
-            floatNode = floatIndexMap.find(filename)->second->findNode(e.r);
+        }
+        case MINISQL_TYPE_FLOAT: {
+            NodeSearchParse<float> floatNode = floatIndexMap.find(filename)->second->findNode(e.r);
             floatOffsetMap[filename] = floatNode;
             return floatNode.node->keyOffset[floatNode.index];
-        case MINISQL_TYPE_CHAR:
-            charNode = charIndexMap.find(filename)->second->findNode(e.str);
+        }
+        case MINISQL_TYPE_CHAR: {
+            NodeSearchParse<string> charNode = charIndexMap.find(filename)->second->findNode(e.str);
             charOffsetMap[filename] = charNode;
             return charNode.node->keyOffset[charNode.index];
+        }
         default:
             cerr << "Undefined type!" << endl;
             return -1;
@@ -73,13 +79,9 @@ int IndexManager::search(const string &filename, const Element &e) {
 }
 
 int IndexManager::searchNext(const string &filename, int attrType) {
-    NodeSearchParse<int> intNode;
-    NodeSearchParse<float> floatNode;
-    NodeSearchParse<string> charNode;
-
     switch (attrType) {
-        case MINISQL_TYPE_INT:
-            intNode = intOffsetMap.find(filename)->second;
+        case MINISQL_TYPE_INT: {
+            NodeSearchParse<int> intNode = intOffsetMap.find(filename)->second;
             intNode.index++;
             if (intNode.index == intNode.node->cnt) {
                 intNode.node = intNode.node->sibling;
@@ -90,8 +92,9 @@ int IndexManager::searchNext(const string &filename, int attrType) {
                 return intNode.node->keyOffset[intNode.index];
             }
             break;
-        case MINISQL_TYPE_FLOAT:
-            floatNode = floatOffsetMap.find(filename)->second;
+        }
+        case MINISQL_TYPE_FLOAT: {
+            NodeSearchParse<float> floatNode = floatOffsetMap.find(filename)->second;
             floatNode.index++;
             if (floatNode.index == floatNode.node->cnt) {
                 floatNode.node = floatNode.node->sibling;
@@ -102,8 +105,9 @@ int IndexManager::searchNext(const string &filename, int attrType) {
                 return floatNode.node->keyOffset[floatNode.index];
             }
             break;
-        case MINISQL_TYPE_CHAR:
-            charNode = charOffsetMap.find(filename)->second;
+        }
+        case MINISQL_TYPE_CHAR: {
+            NodeSearchParse<string> charNode = charOffsetMap.find(filename)->second;
             charNode.index++;
             if (charNode.index == charNode.node->cnt) {
                 charNode.node = charNode.node->sibling;
@@ -114,6 +118,7 @@ int IndexManager::searchNext(const string &filename, int attrType) {
                 return charNode.node->keyOffset[charNode.index];
             }
             break;
+        }
         default:
             cerr << "Undefined type!" << endl;
             return -1;
@@ -168,25 +173,28 @@ bool IndexManager::removeKey(const string &filename, const Element &e) {
 }
 
 int IndexManager::searchHead(const string &filename, int attrType) {
-    NodeSearchParse<int> intNode;
-    NodeSearchParse<float> floatNode;
-    NodeSearchParse<string> charNode;
     switch (attrType) {
-        case MINISQL_TYPE_INT:
+        case MINISQL_TYPE_INT: {
+            NodeSearchParse<int> intNode{};
             intNode.node = intIndexMap.find(filename)->second->getHeadNode();
             intNode.index = 0;
             intOffsetMap[filename] = intNode;
             return intNode.node->keyOffset[intNode.index];
-        case MINISQL_TYPE_FLOAT:
+        }
+        case MINISQL_TYPE_FLOAT: {
+            NodeSearchParse<float> floatNode{};
             floatNode.node = floatIndexMap.find(filename)->second->getHeadNode();
             floatNode.index = 0;
             floatOffsetMap[filename] = floatNode;
             return floatNode.node->keyOffset[floatNode.index];
-        case MINISQL_TYPE_CHAR:
+        }
+        case MINISQL_TYPE_CHAR: {
+            NodeSearchParse<string> charNode{};
             charNode.node = charIndexMap.find(filename)->second->getHeadNode();
             charNode.index = 0;
             charOffsetMap[filename] = charNode;
             return charNode.node->keyOffset[charNode.index];
+        }
         default:
             cerr << "Undefined type!" << endl;
             break;
