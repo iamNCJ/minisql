@@ -3,6 +3,7 @@
 
 #include <string>
 #include <map>
+#include <memory>
 #include "../DataStructure.h"
 #include "../BPTree.h"
 
@@ -12,8 +13,7 @@ using namespace MiniSqlBasic;
 class IndexManager {
 public:
     IndexManager() = default;
-    // fixme!!! destructor needs to be implemented to release memory of B+Tree instances
-    ~IndexManager();
+    // with shared_ptr, B+ trees are freed automatically, upon destruction of maps.
 
     bool create(const string &filename, const SqlValueType &type);
     bool drop(const string &filename, const SqlValueType &type);
@@ -25,9 +25,9 @@ public:
     bool removeKey(const string &filename, const Element &e);
 
 private:
-    map<string, BPTree<int> *> intIndexMap;
-    map<string, BPTree<float> *> floatIndexMap;
-    map<string, BPTree<string> *> charIndexMap;
+    map<string, std::shared_ptr<BPTree<int>>> intIndexMap;
+    map<string, std::shared_ptr<BPTree<float>>> floatIndexMap;
+    map<string, std::shared_ptr<BPTree<string>>> charIndexMap;
     map<string, NodeSearchParse<int>> intOffsetMap;
     map<string, NodeSearchParse<float>> floatOffsetMap;
     map<string, NodeSearchParse<string>> charOffsetMap;

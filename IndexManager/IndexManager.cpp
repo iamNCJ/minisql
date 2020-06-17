@@ -1,26 +1,22 @@
 #include "IndexManager.h"
 
-IndexManager::~IndexManager() {
-
-}
-
 bool IndexManager::create(const string &filename, const SqlValueType &type) {
     int itemSize = type.getSize();
     int treeDegree = type.getDegree();
     switch (type.M()) {
         case MINISQL_TYPE_INT: {
-            auto *intBpTree = new BPTree<int>(filename, itemSize, treeDegree);
-            intIndexMap.insert(map<string, BPTree<int> *>::value_type(filename, intBpTree));
+            auto tree = std::make_shared<decltype(intIndexMap)::value_type::second_type::element_type>(filename, itemSize, treeDegree);
+            intIndexMap.insert(decltype(intIndexMap)::value_type(filename, tree));
             break;
         }
         case MINISQL_TYPE_FLOAT: {
-            auto *floatBpTree = new BPTree<float>(filename, itemSize, treeDegree);
-            floatIndexMap.insert(map<string, BPTree<float> *>::value_type(filename, floatBpTree));
+            auto tree = std::make_shared<decltype(floatIndexMap)::value_type::second_type::element_type>(filename, itemSize, treeDegree);
+            floatIndexMap.insert(decltype(floatIndexMap)::value_type(filename, tree));
             break;
         }
         case MINISQL_TYPE_CHAR: {
-            auto *charBpTree = new BPTree<string>(filename, itemSize, treeDegree);
-            charIndexMap.insert(map<string, BPTree<string> *>::value_type(filename, charBpTree));
+            auto tree = std::make_shared<decltype(charIndexMap)::value_type::second_type::element_type>(filename, itemSize, treeDegree);
+            charIndexMap.insert(decltype(charIndexMap)::value_type(filename, tree));
             break;
         }
         default:
@@ -32,21 +28,15 @@ bool IndexManager::create(const string &filename, const SqlValueType &type) {
 bool IndexManager::drop(const string &filename, const SqlValueType &type) {
     switch (type.M()) {
         case MINISQL_TYPE_INT: {
-            auto intBpIterator = intIndexMap.find(filename);
-            delete intBpIterator->second;
-            intIndexMap.erase(intBpIterator);
+            intIndexMap.erase(intIndexMap.find(filename));
             break;
         }
         case MINISQL_TYPE_FLOAT: {
-            auto floatBpIterator = floatIndexMap.find(filename);
-            delete floatBpIterator->second;
-            floatIndexMap.erase(floatBpIterator);
+            floatIndexMap.erase(floatIndexMap.find(filename));
             break;
         }
         case MINISQL_TYPE_CHAR: {
-            auto charBpIterator = charIndexMap.find(filename);
-            delete charBpIterator->second;
-            charIndexMap.erase(charBpIterator);
+            charIndexMap.erase(charIndexMap.find(filename));
             break;
         }
         default:
