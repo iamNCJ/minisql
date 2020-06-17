@@ -1,6 +1,6 @@
 #include "IndexManager.h"
 
-bool IndexManager::create(const string &filename, const SqlValueType &type) {
+void IndexManager::create(const string &filename, const SqlValueType &type) {
     int itemSize = type.getSize();
     int treeDegree = type.getDegree();
     switch (type.M()) {
@@ -25,7 +25,7 @@ bool IndexManager::create(const string &filename, const SqlValueType &type) {
     }
 }
 
-bool IndexManager::drop(const string &filename, const SqlValueType &type) {
+void IndexManager::drop(const string &filename, const SqlValueType &type) {
     switch (type.M()) {
         case MINISQL_TYPE_INT: {
             intIndexMap.erase(intIndexMap.find(filename));
@@ -116,24 +116,6 @@ int IndexManager::searchNext(const string &filename, int attrType) {
     return -1;
 }
 
-bool IndexManager::finishSearch(const string &filename, int attrType) {
-    switch (attrType) {
-        case MINISQL_TYPE_INT:
-            intOffsetMap.erase(filename);
-            break;
-        case MINISQL_TYPE_FLOAT:
-            floatOffsetMap.erase(filename);
-            break;
-        case MINISQL_TYPE_CHAR:
-            charOffsetMap.erase(filename);
-            break;
-        default:
-            cerr << "Undefined type!" << endl;
-            break;
-    }
-    return true;
-}
-
 bool IndexManager::insert(const string &filename, const Element &e, int offset) {
     switch (e.type.M()) {
         case MINISQL_TYPE_INT:
@@ -144,7 +126,7 @@ bool IndexManager::insert(const string &filename, const Element &e, int offset) 
             return charIndexMap.find(filename)->second->insert(e.str, offset);
         default:
             cerr << "Undefined type!" << endl;
-            break;
+            return {};
     }
 }
 
@@ -158,7 +140,7 @@ bool IndexManager::removeKey(const string &filename, const Element &e) {
             return charIndexMap.find(filename)->second->remove(e.str);
         default:
             cerr << "Undefined type!" << endl;
-            break;
+            return {};
     }
 }
 
@@ -187,6 +169,6 @@ int IndexManager::searchHead(const string &filename, int attrType) {
         }
         default:
             cerr << "Undefined type!" << endl;
-            break;
+            return {};
     }
 }

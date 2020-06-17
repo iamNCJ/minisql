@@ -15,12 +15,12 @@ public:
     IndexManager() = default;
     // with shared_ptr, B+ trees are freed automatically, upon destruction of maps.
 
-    bool create(const string &filename, const SqlValueType &type);
-    bool drop(const string &filename, const SqlValueType &type);
+    void create(const string &filename, const SqlValueType &type);
+    void drop(const string &filename, const SqlValueType &type);
     int search(const string &filename, const Element &e);
     int searchHead(const string &filename, int attrType);
     int searchNext(const string &filename, int attrType);
-    bool finishSearch(const string &filename, int attrType);
+
     bool insert(const string &filename, const Element &e, int offset);
     bool removeKey(const string &filename, const Element &e);
 
