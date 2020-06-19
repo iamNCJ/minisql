@@ -28,9 +28,9 @@ int API::insert(const std::string &tableName, std::vector<MiniSqlBasic::SqlValue
     // Prepare value
     for (int i = 0, len = valueList.size(); i < len; i++) {
         if (valueList.at(i).type.type != table.attrType.at(i).type) {
-            if (valueList.at(i).type.type == SqlValueTypeBase::Integer &&
-                table.attrType.at(i).type == SqlValueTypeBase::Float) {
-                valueList.at(i).type.type = SqlValueTypeBase::Float;
+            if (valueList.at(i).type.type == SqlValueTypeEnum::Integer &&
+                table.attrType.at(i).type == SqlValueTypeEnum::Float) {
+                valueList.at(i).type.type = SqlValueTypeEnum::Float;
                 valueList.at(i).r = float(valueList.at(i).i);
             } else {
                 std::cerr << "Type Error!" << std::endl;
@@ -38,7 +38,7 @@ int API::insert(const std::string &tableName, std::vector<MiniSqlBasic::SqlValue
             }
         }
         valueList.at(i).type.attrName = table.attrNames.at(i);
-        if (valueList.at(i).type.type == SqlValueTypeBase::String) {
+        if (valueList.at(i).type.type == SqlValueTypeEnum::String) {
             if (valueList.at(i).str.length() > table.attrType.at(i).charSize) {
                 std::cerr << "String too long! Max " << table.attrType.at(i).charSize << ", got "
                           << valueList.at(i).str.length();
@@ -49,7 +49,7 @@ int API::insert(const std::string &tableName, std::vector<MiniSqlBasic::SqlValue
     }
 
     // Assert unique
-    IndexHint uniqueTest;
+    IndexedAttrList uniqueTest;
     std::vector<Cond> conditions;
     conditions.emplace_back();
     Cond &condition = conditions[0];
@@ -62,7 +62,7 @@ int API::insert(const std::string &tableName, std::vector<MiniSqlBasic::SqlValue
             condition.attr = value.type.attrName;
             uniqueTest.attrName = condition.attr;
             uniqueTest.cond = condition;
-            uniqueTest.attrType = condition.value.type.M();
+            uniqueTest.attrType = condition.value.type.typeIndex();
             if (rm->selectRecord(table, table.attrNames, conditions, uniqueTest, false)) {
                 std::cerr << "Insert failed. Duplicate key!" << std::endl;
                 return 0;
@@ -76,7 +76,7 @@ int API::insert(const std::string &tableName, std::vector<MiniSqlBasic::SqlValue
 
     for (const auto &idx: table.index) {
         auto it = std::find(table.attrNames.begin(), table.attrNames.end(), idx.first);
-        im->insert(indexFile(table.Name, idx.first),
+        im->insert(indexFilename(table.Name, idx.first),
                    valueList[it - table.attrNames.begin()], offset);
     }
 
@@ -209,10 +209,10 @@ bool API::select(const std::string &tableName, const std::vector<MiniSqlBasic::C
         for (const auto &index: table.index) {
             for (const auto &cond: condList) {
                 if (index.first == cond.attr) { // if this is the index on the attr
-                    IndexHint hint;
+                    IndexedAttrList hint;
                     hint.attrName = cond.attr;
                     hint.cond = cond;
-                    hint.attrType = cond.value.type.M();
+                    hint.attrType = cond.value.type.typeIndex();
                     return _rm->selectRecord(table, attrList, condList, hint); // use index to acc
                 }
             }
@@ -243,7 +243,7 @@ bool API::createTable(const std::string &tableName,
 
     // check char(n) range 1~255
     for (auto &attr: attrList) {
-        if (attr.second.type == SqlValueTypeBase::String) {
+        if (attr.second.type == SqlValueTypeEnum::String) {
             if (attr.second.charSize < 1 || attr.second.charSize > 255) {
                 std::cerr << "Char count out of range" << std::endl;
                 return false;
@@ -262,7 +262,7 @@ bool API::createTable(const std::string &tableName,
                 primaryKeyFoundFlag = true;
                 primaryKeyType = attr.second;
                 primaryKeyType.unique = true;
-                primaryKeyType.charSize = attr.second.getSize();
+                primaryKeyType.charSize = attr.second.size();
                 primaryKeyType.attrName = attr.first;
                 indexName = "pri_" + tableName + "_" + attr.first;
                 isPrimaryIndex = true;

@@ -190,13 +190,13 @@ void Parser::execSelect(const std::vector<std::string> &args) {
             SqlValueType type = table.attrType.at(j);
             val.type = type;
             switch (type.type) {
-                case SqlValueTypeBase::Integer:
+                case SqlValueTypeEnum::Integer:
                     val.i = std::stoi(args.at(i));
                     break;
-                case SqlValueTypeBase::Float:
+                case SqlValueTypeEnum::Float:
                     val.r = std::stof(args.at(i));
                     break;
-                case SqlValueTypeBase::String:
+                case SqlValueTypeEnum::String:
                     val.str = args.at(i).substr(1, args.at(i).length() - 2); // remove 2 "'"
                     break;
             }
@@ -287,13 +287,13 @@ void Parser::execDelete(const std::vector<std::string> &args) {
             SqlValueType type = table.attrType.at(j);
             val.type = type;
             switch (type.type) {
-                case SqlValueTypeBase::Integer:
+                case SqlValueTypeEnum::Integer:
                     val.i = std::stoi(args.at(i));
                     break;
-                case SqlValueTypeBase::Float:
+                case SqlValueTypeEnum::Float:
                     val.r = std::stof(args.at(i));
                     break;
-                case SqlValueTypeBase::String:
+                case SqlValueTypeEnum::String:
                     val.str = args.at(i).substr(1, args.at(i).length() - 2); // remove 2 "'"
                     break;
             }
@@ -396,13 +396,13 @@ void Parser::execCreateTable(const vector<std::string> &args) {
 
             type.attrName = args.at(i++);
             if (args.at(i) == "int") { // Integer
-                type.type = MiniSqlBasic::SqlValueTypeBase::Integer;
+                type.type = MiniSqlBasic::SqlValueTypeEnum::Integer;
                 i++;
             } else if (args.at(i) == "float") { // Float
-                type.type = MiniSqlBasic::SqlValueTypeBase::Float;
+                type.type = MiniSqlBasic::SqlValueTypeEnum::Float;
                 i++;
             } else if (args.at(i) == "char") { // Char
-                type.type = MiniSqlBasic::SqlValueTypeBase::String;
+                type.type = MiniSqlBasic::SqlValueTypeEnum::String;
                 i += 2;
                 type.charSize = std::stoi(args.at(i)); // i++ to pass ")"
                 i += 2;
@@ -461,13 +461,13 @@ void Parser::execInsert(const vector<std::string> &args) {
                 SqlValueType type = table.attrType.at(j);
                 val.type = type;
                 switch (type.type) {
-                    case SqlValueTypeBase::Integer:
+                    case SqlValueTypeEnum::Integer:
                         val.i = std::stoi(args.at(i));
                         break;
-                    case SqlValueTypeBase::Float:
+                    case SqlValueTypeEnum::Float:
                         val.r = std::stof(args.at(i));
                         break;
-                    case SqlValueTypeBase::String:
+                    case SqlValueTypeEnum::String:
                         val.str = args.at(i).substr(1, args.at(i).length() - 2); // remove 2 "'"
                         break;
                 }

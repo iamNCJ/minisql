@@ -38,19 +38,19 @@ void CatalogManager::WriteToFile() const {
             // attr type
             const auto &attr = table.attrType[i];
             switch (attr.type) {
-                case MiniSqlBasic::SqlValueTypeBase::Integer:
+                case MiniSqlBasic::SqlValueTypeEnum::Integer:
                     catalogFileOut << "int" << std::endl;
                     break;
-                case MiniSqlBasic::SqlValueTypeBase::Float:
+                case MiniSqlBasic::SqlValueTypeEnum::Float:
                     catalogFileOut << "float" << std::endl;
                     break;
-                case MiniSqlBasic::SqlValueTypeBase::String:
+                case MiniSqlBasic::SqlValueTypeEnum::String:
                     catalogFileOut << "char" << std::endl;
                     break;
             }
 
             // check if is string
-            if (attr.type == MiniSqlBasic::SqlValueTypeBase::String) {
+            if (attr.type == MiniSqlBasic::SqlValueTypeEnum::String) {
                 catalogFileOut << attr.charSize << std::endl;
             } else {
                 catalogFileOut << 0 << std::endl;
@@ -117,16 +117,16 @@ void CatalogManager::LoadFromFile() {
 
             // set type
             if (typeName == "int") {
-                type.type = MiniSqlBasic::SqlValueTypeBase::Integer;
+                type.type = MiniSqlBasic::SqlValueTypeEnum::Integer;
             } else if (typeName == "char") {
-                type.type = MiniSqlBasic::SqlValueTypeBase::String;
+                type.type = MiniSqlBasic::SqlValueTypeEnum::String;
                 type.charSize = size;
             } else if (typeName == "float") {
-                type.type = MiniSqlBasic::SqlValueTypeBase::Float;
+                type.type = MiniSqlBasic::SqlValueTypeEnum::Float;
             } else {
                 ; // TODO corupted file
             }
-            recordLength += type.getSize();
+            recordLength += type.size();
             type.primary = isPrimary != 0;
             type.unique = isUnique != 0;
             type.attrName = attrName;
@@ -169,7 +169,7 @@ void CatalogManager::CreateTable(const std::string &TableName,
 
     // Make attribute
     for (const auto &schema: schemaList) {
-        len += schema.second.getSize();
+        len += schema.second.size();
         table.attrNames.push_back(schema.first);
         auto t = schema.second;
         t.attrName = schema.first;

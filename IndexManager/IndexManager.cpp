@@ -1,9 +1,9 @@
 #include "IndexManager.h"
 
 void IndexManager::create(const string &filename, const SqlValueType &type) {
-    int itemSize = type.getSize();
-    int treeDegree = type.getDegree();
-    switch (type.M()) {
+    int itemSize = type.size();
+    int treeDegree = type.degree();
+    switch (type.typeIndex()) {
         case MINISQL_TYPE_INT: {
             auto tree = std::make_shared<decltype(intIndexMap)::value_type::second_type::element_type>(filename, itemSize, treeDegree);
             intIndexMap.insert(decltype(intIndexMap)::value_type(filename, tree));
@@ -26,7 +26,7 @@ void IndexManager::create(const string &filename, const SqlValueType &type) {
 }
 
 void IndexManager::drop(const string &filename, const SqlValueType &type) {
-    switch (type.M()) {
+    switch (type.typeIndex()) {
         case MINISQL_TYPE_INT: {
             intIndexMap.erase(intIndexMap.find(filename));
             break;
@@ -46,7 +46,7 @@ void IndexManager::drop(const string &filename, const SqlValueType &type) {
 }
 
 int IndexManager::search(const string &filename, const Element &e) {
-    switch (e.type.M()) {
+    switch (e.type.typeIndex()) {
         case MINISQL_TYPE_INT: {
             NodeSearchParse<int> intNode = intIndexMap.find(filename)->second->findNode(e.i);
             intOffsetMap[filename] = intNode;
@@ -117,7 +117,7 @@ int IndexManager::searchNext(const string &filename, int attrType) {
 }
 
 bool IndexManager::insert(const string &filename, const Element &e, int offset) {
-    switch (e.type.M()) {
+    switch (e.type.typeIndex()) {
         case MINISQL_TYPE_INT:
             return intIndexMap.find(filename)->second->insert(e.i, offset);
         case MINISQL_TYPE_FLOAT:
@@ -131,7 +131,7 @@ bool IndexManager::insert(const string &filename, const Element &e, int offset) 
 }
 
 bool IndexManager::removeKey(const string &filename, const Element &e) {
-    switch (e.type.M()) {
+    switch (e.type.typeIndex()) {
         case MINISQL_TYPE_INT:
             return intIndexMap.find(filename)->second->remove(e.i);
         case MINISQL_TYPE_FLOAT:

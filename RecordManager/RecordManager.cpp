@@ -39,7 +39,7 @@ bool RecordManager::createIndex(const Table &table, const SqlValueType &index) {
             attr.type = attrType;
             break;
         }
-        offset += attrType.getSize();
+        offset += attrType.size();
     }
 
     //Initiate some important number
@@ -55,13 +55,13 @@ bool RecordManager::createIndex(const Table &table, const SqlValueType &index) {
             dest = block + i * length + offset; // Move the pointer to right place
             switch (attr.M()) {
                 case MINISQL_TYPE_INT:
-                    memcpy(&attr.i, dest, attr.type.getSize());
+                    memcpy(&attr.i, dest, attr.type.size());
                     break;
                 case MINISQL_TYPE_FLOAT:
-                    memcpy(&attr.r, dest, attr.type.getSize());
+                    memcpy(&attr.r, dest, attr.type.size());
                     break;
                 case MINISQL_TYPE_CHAR:
-                    attr.str.replace(0, attr.type.getSize(), dest);
+                    attr.str.replace(0, attr.type.size(), dest);
                     break;
                 default:
                     cerr << "Undefined type in RM::createIndex." << endl;
@@ -141,7 +141,7 @@ int RecordManager::insertRecord(const Table &table, const Tuple &record) {
     int offset = 1; // Storing the pointer inside one record
     string fixedStr;
     for (auto attr = record.element.begin(); attr < record.element.end(); attr++) {
-        switch (attr->type.M()) {
+        switch (attr->type.typeIndex()) {
             case MINISQL_TYPE_CHAR:
                 fixedStr = attr->str;
                 if (attr->type.charSize > fixedStr.length()) {
@@ -213,7 +213,7 @@ int RecordManager::selectRecord(const Table &table, const vector<string> &attr, 
  * @return
  */
 int RecordManager::selectRecord(const Table &table, const vector<string> &attr, const vector<Cond> &cond,
-                                 const IndexHint &indexHint, bool printResult) {
+                                const IndexedAttrList &indexHint, bool printResult) {
     string tableFileName = table.Name + ".tb";
     string indexFileName = table.Name + "_" + indexHint.attrName + ".ind";
     int recordPos; // Compute a init start point
@@ -247,7 +247,7 @@ int RecordManager::selectRecord(const Table &table, const vector<string> &attr, 
             e = tup.fetchElement(table.attrNames, indexHint.attrName);
             if (indexHint.cond.cond == MINISQL_COND_MORE) {
                 // Selection done
-                IndexHint tmp = indexHint;
+                IndexedAttrList tmp = indexHint;
                 tmp.cond.cond = MINISQL_COND_GEQUAL;
                 if (!tmp.cond.test(e)) {
                     bm->setFree(tableFileName, blockID);
@@ -298,7 +298,7 @@ bool RecordManager::deleteRecord(const Table &table, const vector<Cond> &cond) {
             if (block[i * length] != Used) { continue; }
             readBlock(block, i * length, table.attrType, tup);
             if (validCheck(cond, tup, table.attrNames)) {
-                block[i * length] = UnUsed;
+                block[i * length] = Unused;
                 // Delete indexed key in b+ tree
                 for (auto &col: tup.element) {
                     for (auto &attr : table.index) {
@@ -366,7 +366,7 @@ void RecordManager::readBlock(const char *blockBuffer, int offset, const std::ve
     for (int i = 0; i < attrType.size(); i++) {
         e.reset();
         e.type = attrType[i];
-        switch (attrType[i].M()) {
+        switch (attrType[i].typeIndex()) {
             case MINISQL_TYPE_INT:
                 memcpy(&e.i, block, sizeof(int));
                 block += sizeof(int);

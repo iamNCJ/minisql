@@ -44,7 +44,7 @@ public:
 
     int selectRecord(const Table &table, const vector<string> &attr, const vector<Cond> &cond);
 
-    int selectRecord(const Table &table, const vector<string> &attr, const vector<Cond> &cond, const IndexHint &indexHint,
+    int selectRecord(const Table &table, const vector<string> &attr, const vector<Cond> &cond, const IndexedAttrList &indexHint,
                      bool printResult = true);
 };
 

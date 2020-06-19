@@ -16,24 +16,18 @@
 namespace MiniSqlBasic {
     const int BlockSize = 4096;
     const int MaxBlocks = 128;
-    const char UnUsed = 0;
+    const char Unused = 0;
     const char Used = 1;
 
-    inline std::string dbFile(const std::string &db) { return db + ".db"; }
+    inline std::string indexFilename(const std::string &table, const std::string &index) {return table + "_" + index + ".ind";}
 
-    inline std::string tableFile(const std::string &table) { return table + ".tb"; }
-
-    inline std::string indexFile(const std::string &table, const std::string &index) {
-        return table + "_" + index + ".ind";
-    }
-
-    enum class SqlValueTypeBase {
+    enum class SqlValueTypeEnum {
         Integer,
         String,
         Float
     };
 
-    enum MinisqlType {
+    enum MiniSqlType {
         MINISQL_TYPE_INT,
         MINISQL_TYPE_CHAR,
         MINISQL_TYPE_FLOAT,
@@ -42,26 +36,25 @@ namespace MiniSqlBasic {
 
     struct SqlValueType {
         std::string attrName;
-        SqlValueTypeBase type;
+        SqlValueTypeEnum type;
 
-        ///following fileds only for attribute type, not a single sql value type.
-        bool primary = false;
-        size_t charSize; // charSize does not include the terminating zero of string!
         bool unique = false;
+        bool primary = false;
+        size_t charSize;
 
-        inline int M() const {
+        inline int typeIndex() const {
             switch (type) {
-                case SqlValueTypeBase::Integer:
+                case SqlValueTypeEnum::Integer:
                     return MINISQL_TYPE_INT;
-                case SqlValueTypeBase::Float:
+                case SqlValueTypeEnum::Float:
                     return MINISQL_TYPE_FLOAT;
-                case SqlValueTypeBase::String:
+                case SqlValueTypeEnum::String:
                     return MINISQL_TYPE_CHAR;
             }
         }
 
-        inline size_t getSize() const {
-            switch (M()) {
+        inline size_t size() const {
+            switch (typeIndex()) {
                 case MINISQL_TYPE_INT:
                     return sizeof(int);
                 case MINISQL_TYPE_FLOAT:
@@ -71,12 +64,7 @@ namespace MiniSqlBasic {
             }
         }
 
-        inline int getDegree() const {
-            size_t keySize = getSize();
-            int degree = BlockSize / (keySize + sizeof(int));
-
-            return degree;
-        }
+        inline int degree() const {return BlockSize / (size() + sizeof(int));}
     };
 
     struct SqlValue {
@@ -87,11 +75,11 @@ namespace MiniSqlBasic {
 
         inline size_t M() const {
             switch (type.type) {
-                case SqlValueTypeBase::Integer:
+                case SqlValueTypeEnum::Integer:
                     return MINISQL_TYPE_INT;
-                case SqlValueTypeBase::Float:
+                case SqlValueTypeEnum::Float:
                     return MINISQL_TYPE_FLOAT;
-                case SqlValueTypeBase::String:
+                case SqlValueTypeEnum::String:
                     return MINISQL_TYPE_CHAR;
             }
         }
@@ -292,7 +280,7 @@ namespace MiniSqlBasic {
         }
     };
 
-    struct IndexHint {
+    struct IndexedAttrList {
         Cond cond;
         std::string attrName;
         int attrType;
