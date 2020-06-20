@@ -125,9 +125,9 @@ void BufferManager::setBusy(int id) {
  * @return
  */
 Block &BufferManager::getLRU() {
-    int max = maxLRU;
+    int max = blockBuffer[0].LRUCnt;
     Block *probe = nullptr;
-    for (auto const &blk: blockBuffer) {
+    for (auto & blk : blockBuffer) {
         if (blk.busy) continue;
         if (blk.LRUCnt <= max) {
             max = blk.LRUCnt;

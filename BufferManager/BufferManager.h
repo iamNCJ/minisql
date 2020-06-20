@@ -15,13 +15,13 @@ using namespace std;
 using namespace MiniSqlBasic;
 
 struct Block {
-    unsigned int blockID;
-    int LRUCnt;
     string filename;
+    unsigned int blockID;
     int id;
     bool dirty;
     bool busy;
     char content[BlockSize];
+    int LRUCnt;
 
     Block() { reset(); }
 
