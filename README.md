@@ -5,9 +5,6 @@ MiniSQL for Database Course 2020 Spring&amp;Summer
 
 ![image-20200420121320432](doc/img/modules.png)
 
-### Interpreter
-### API
-### Catalog Manager
-### Record Manager
-### Index Manager
-### Buffer Manager
+## Documentation
+
+`doc/group.pdf`
