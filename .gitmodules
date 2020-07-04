@@ -1,0 +1,3 @@
+[submodule "minisql-frontend"]
+	path = minisql-frontend
+	url = https://github.com/std4453/minisql-frontend
